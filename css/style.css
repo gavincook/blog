@@ -258,7 +258,6 @@ a:hover, a:active {
   padding: 10px;
 }
 .post .post-title h3 {
-  text-transform: uppercase;
   letter-spacing: 1px;
   line-height: 1;
   font-weight: 600;
