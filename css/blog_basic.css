@@ -286,7 +286,7 @@ dl dt {
                       font-family: Inconsolata, monospace, sans-serif;
                       font-size: 0.85em;
                       white-space: pre-wrap;
-                      border: 1px solid #E3EDF3;
+                      /*border: 1px solid #E3EDF3;*/
                       background: #f7f7f9;
                       color: #d14;
                       border-radius: 2px; }
