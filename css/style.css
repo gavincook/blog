@@ -107,12 +107,22 @@ a:hover, a:active {
   animation-name: fadeInDown;
 }
 
-/*animation ends*/
-.content {
-  height: auto;
-  margin-top: 60px;
-  padding:10px;
-  padding-left:250px;
+@media screen and (max-width: 960px) {
+  .content {
+    height: auto;
+    margin-top: 60px;
+    padding:10px;
+    padding-left:0;
+  }
+}
+
+@media screen and (min-width: 960px){
+  .content {
+    height: auto;
+    margin-top: 60px;
+    padding:10px;
+    padding-left:250px;
+  }
 }
 
 .page-top {
@@ -125,10 +135,15 @@ a:hover, a:active {
   border-bottom: 1px solid #f2f2f2;
   top:0;
 }
+
+@media screen and (min-width: 960px) {
+  .page-top .nav {
+    margin-left: 250px;   
+  }
+}
 .page-top .nav {
   list-style: none;
   padding: 18px 30px;
-  margin-left: 250px;   
   float: left;
   font-size: 12px;
 }
