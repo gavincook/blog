@@ -717,3 +717,13 @@ a.btn {
     display: grid;
   }
 }
+
+.post td, .post th {
+    border: solid 1px #ccc;
+    border-spacing: 0px;
+    padding: 5px;
+}
+
+table{
+    border-collapse: collapse;
+}
