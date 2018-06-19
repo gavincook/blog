@@ -5,8 +5,9 @@
   var s = document.getElementsByTagName("script")[0]; 
   s.parentNode.insertBefore(hm, s);
 })();
-
-</script><div id="script"></div>#  var jiathis_config = {data_track_clickback:'true'};<div id="script" src="http://v3.jiathis.com/code/jiathis_r.js?type=left&amp;amp;move=0&amp;amp;uid=2128729"></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives/">归档</a></li><li><a href="/about-me/">关于</a></li></div><div class="information"><div class="back_btn"><li><a onclick="window.history.go(-1)" class="fa fa-chevron-left"> </a></li></div><div class="avatar"><img src="http://gavincook.me/avatar.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Spring ApplicationContextAware与循环依赖</a></h3></div><div class="post-content"><p>在一个风和日丽的下午，笔者正在开开心心地撸着代码。一切都那么水到渠成，好了，写完，坐等启动…<br>嗯？？？启动异常，乍一看<code>NPE</code>，再一看，Spring依赖的bean属性没有注入？<br>为了描述具体的场景，这里将问题用示例代码抽取出来。<br>我们有两个Spring Bean，<code>CandidateOne</code>和<code>CandidateTwo</code>，具体代码如下：</p>
+</script><!--script.
+  var jiathis_config = {data_track_clickback:'true'};
+  script(src="http://v3.jiathis.com/code/jiathis_r.js?type=left&amp;move=0&amp;uid=2128729")--></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives/">归档</a></li><li><a href="/about-me/">关于</a></li></div><div class="information"><div class="back_btn"><li><a onclick="window.history.go(-1)" class="fa fa-chevron-left"> </a></li></div><div class="avatar"><img src="http://gavincook.me/avatar.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Spring ApplicationContextAware与循环依赖</a></h3></div><div class="post-content"><p>在一个风和日丽的下午，笔者正在开开心心地撸着代码。一切都那么水到渠成，好了，写完，坐等启动…<br>嗯？？？启动异常，乍一看<code>NPE</code>，再一看，Spring依赖的bean属性没有注入？<br>为了描述具体的场景，这里将问题用示例代码抽取出来。<br>我们有两个Spring Bean，<code>CandidateOne</code>和<code>CandidateTwo</code>，具体代码如下：</p>
 <h4 id="CandidateOne"><a href="#CandidateOne" class="headerlink" title="CandidateOne:"></a>CandidateOne:</h4><pre><code>/**
  * 候选者1，依赖候选者2
  *

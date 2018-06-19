@@ -6,8 +6,9 @@
   var s = document.getElementsByTagName("script")[0]; 
   s.parentNode.insertBefore(hm, s);
 })();
-
-</script><div id="script"></div>#  var jiathis_config = {data_track_clickback:'true'};<div id="script" src="http://v3.jiathis.com/code/jiathis_r.js?type=left&amp;amp;move=0&amp;amp;uid=2128729"></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives/">归档</a></li><li><a href="/about-me/">关于</a></li></div><div class="information"><div class="back_btn"><li><a onclick="window.history.go(-1)" class="fa fa-chevron-left"> </a></li></div><div class="avatar"><img src="http://gavincook.me/avatar.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>重命名文件(目录)</a></h3></div><div class="post-content"><p>在文件操作中，会涉及到重命名文件，或者移动文件。我们至少有如下几种方式来处理文件的重命名。</p>
+</script><!--script.
+  var jiathis_config = {data_track_clickback:'true'};
+  script(src="http://v3.jiathis.com/code/jiathis_r.js?type=left&amp;move=0&amp;uid=2128729")--></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives/">归档</a></li><li><a href="/about-me/">关于</a></li></div><div class="information"><div class="back_btn"><li><a onclick="window.history.go(-1)" class="fa fa-chevron-left"> </a></li></div><div class="avatar"><img src="http://gavincook.me/avatar.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>重命名文件(目录)</a></h3></div><div class="post-content"><p>在文件操作中，会涉及到重命名文件，或者移动文件。我们至少有如下几种方式来处理文件的重命名。</p>
 <h3 id="1-File-renameTo-dest"><a href="#1-File-renameTo-dest" class="headerlink" title="1. File#renameTo(dest)"></a>1. File#renameTo(dest)</h3><p>Java IO中的File类，提供了<code>renameTo</code>方法用于重命名文件。<code>renameTo</code>方法会在没有目标文件的写入权限时抛出<code>SecurityException</code>异常；在目标文件为<code>null</code>时，抛出<code>NullPointerException</code>。而其他原因重命名失败时，仅仅只返回<code>false</code>，成功时返回<code>true</code>。</p>
 <h4 id="1-1-重命名文件"><a href="#1-1-重命名文件" class="headerlink" title="1.1 重命名文件"></a>1.1 重命名文件</h4><ul>
 <li><p>同目录</p>
