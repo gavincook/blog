@@ -48,6 +48,7 @@
 </table>
 <p>这下就能解释为什么上面我们在两种不同环境下测试，表现不一致的现象了。</p>
 <h3 id="3-如何避免大小写区分带来的问题"><a href="#3-如何避免大小写区分带来的问题" class="headerlink" title="3. 如何避免大小写区分带来的问题"></a>3. 如何避免大小写区分带来的问题</h3><p>虽然在不同平台默认表现行为不一致，但终究都是通过参数<code>lower_case_table_names</code>来控制。<br><strong>第一种方式：</strong>在所有平台下使用配置参数<code>lower_case_table_names=1</code>，这样有一个不好之处在于不管我们创建时是不是指定了大小写，最终出来的表名或数据库名都变成了小写。这种方式不会引起大小写问题。<br><strong>第二种方式：</strong>使用区分大小写的写法，但这样需要保证SQL中的大小写和数据库中的大小写完全一致，否则可能会出现跨平台问题。<br><strong>MySQL SQL写法最佳实践：</strong>所有标识符都使用小写+下划线的规范，这样即使在区分大小写的场景也不会引起任何问题。</p>
+<p>另外注意：<code>lower_case_table_names</code>参数不能动态设置，需要在MySQL配置文件的mysqld部分进行配置，配置后需要重启服务才能生效。</p>
 <blockquote>
 <p>参考资料：<a href="https://dev.mysql.com/doc/refman/8.0/en/identifier-case-sensitivity.html" target="_blank" rel="external">identifier case sensitivity</a></p>
 </blockquote>
