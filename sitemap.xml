@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://gavincook.me/identifier-case-sensitivity-in-mysql/</loc>
+    
+    <lastmod>2018-06-21T09:02:26.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://gavincook.me/spring-applicationcontextaware/</loc>
     
     <lastmod>2018-06-13T07:19:02.000Z</lastmod>
