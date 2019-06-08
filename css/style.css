@@ -727,3 +727,20 @@ a.btn {
 table{
     border-collapse: collapse;
 }
+
+#busuanzi_container_page_pv{
+    display: inline;
+    position: absolute;
+    right: 14px;
+    top: 65px;
+    font-size: 12px;
+}
+
+#busuanzi_container_site_pv{
+    display: inline;
+    position: absolute;
+    bottom: 0;
+    text-align: center;
+    width: 100%;
+    font-size: 10px;
+}
