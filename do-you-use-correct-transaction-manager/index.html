@@ -54,35 +54,35 @@ public interface UserStatisticRepository
             Object anything,
             EventSource source,
             boolean requiresImmediateIdAccess) {
-        ...
-        AbstractEntityInsertAction insert = addInsertAction(
-                values, id, entity, persister, useIdentityColumn, source, shouldDelayIdentityInserts
-        );
+    ...
+    AbstractEntityInsertAction insert = addInsertAction(
+            values, id, entity, persister, useIdentityColumn, source, shouldDelayIdentityInserts
+    );
 
-        ...
-        return id;
-    }
+    ...
+    return id;
+}
 </code></pre>
 <p>这里我们只展现了部分重要代码，新增操作最终会映射为一个<code>InsertAction</code>，那个<code>InsertAction</code>会怎么处理呢？且看如下具体处理：</p>
 <pre><code class="java">private AbstractEntityInsertAction addInsertAction(
-            Object[] values,
-            Serializable id,
-            Object entity,
-            EntityPersister persister,
-            boolean useIdentityColumn,
-            EventSource source,
-            boolean shouldDelayIdentityInserts) {
-        if ( useIdentityColumn ) {
-            EntityIdentityInsertAction insert = ...
-            source.getActionQueue().addAction( insert );
-            return insert;
-        }
-        else {
-            EntityInsertAction insert = ...
-            source.getActionQueue().addAction( insert );
-            return insert;
-        }
+        Object[] values,
+        Serializable id,
+        Object entity,
+        EntityPersister persister,
+        boolean useIdentityColumn,
+        EventSource source,
+        boolean shouldDelayIdentityInserts) {
+    if ( useIdentityColumn ) {
+        EntityIdentityInsertAction insert = ...
+        source.getActionQueue().addAction( insert );
+        return insert;
     }
+    else {
+        EntityInsertAction insert = ...
+        source.getActionQueue().addAction( insert );
+        return insert;
+    }
+}
 </code></pre>
 <p>这里我们看到会将<code>InsertAction</code>添加到操作队列中，并没有真正执行新增操作。嗯，到目前还是符合我们预期的，在通常的事务隔离级别下，数据库更新操作都是会在事务提交的时候才会真实改变数据库的数据。<br>于是小红继续跟进事务提交的操作，在系统中小红使用事务管理器是<code>DataSourceTransactionManager</code>，具体配置如下：</p>
 <pre><code class="java">@Bean
@@ -108,14 +108,14 @@ public PlatformTransactionManager transactionManager() {
 </code></pre>
 <p>这个逻辑很简单，就是直接调用数据库连接的提交嘛。等等，那我们前面看到的操作队列里的那些操作呢？怎么没有任何地方去执行？怪不得，用户注册量统计没有写入到数据库。<br>这事务管理器<code>DataSourceTransactionManager</code>怎么不”务实”呢？此时，小红留意到事务管理器有很多实现，其中有一个叫<code>JpaTransactionManager</code>引起了小红的注意。为啥呢，因为我们数据库操作都是jpa呀。<br>闲话少叙，直接将<code>DataSourceTransactionManager</code>切换为<code>JpaTransactionManager</code>，再跑一次看看。果不其然，数据库里有数据了。说明<code>JpaTransactionManager</code>将操作队列中的操作都转换为了数据库操作，具体是怎么做的呢？如下为<code>JpaTransactionManager#doCommit</code>方法：</p>
 <pre><code class="java">protected void doCommit(DefaultTransactionStatus status) {
-        JpaTransactionObject txObject = (JpaTransactionObject) status.getTransaction();
-        ...
-        try {
-            EntityTransaction tx = txObject.getEntityManagerHolder().getEntityManager().getTransaction();
-            tx.commit();
-        }
-        ...
+    JpaTransactionObject txObject = (JpaTransactionObject) status.getTransaction();
+    ...
+    try {
+        EntityTransaction tx = txObject.getEntityManagerHolder().getEntityManager().getTransaction();
+        tx.commit();
     }
+    ...
+}
 </code></pre>
 <p>我们可以看到，其不再是直接调用数据库连接的提交动作，而是使用<code>EntityTransaction</code>进行事务提交。进一步跟进<code>EntityTransaction#commit</code>，最终小红在<code>JdbcResourceLocalTransactionCoordinatorImpl#commit</code>中看到如下代码：</p>
 <pre><code class="java">public void commit() {
@@ -152,8 +152,8 @@ public PlatformTransactionManager transactionManager() {
 <li>Hibernate: <code>HibernateTransactionManager</code></li>
 </ul>
 <h3 id="4-真相大白了吗"><a href="#4-真相大白了吗" class="headerlink" title="4. 真相大白了吗"></a>4. 真相大白了吗</h3><p>前面小红分析出了问题的根因，并整理出了不同场景下应该使用的事务管理器。但小红并没有面露喜色，因为还有一个问题让小红不解。<br>既然<code>DataSourceTransactionManager</code>在JPA场景下会导致更新操作没法真实在数据库生效，那么之前其他的场景，比如用户注册是怎么将数据落库的呢？难道和定时调度的方式有关系吗？<br>且听小红后续带来的揭秘！！！</p>
-</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2020-05-04</span><i class="fa fa-tag"></i><a href="/tags/spring/" title="spring" class="tag">spring </a></div></div></div></div><div class="share"><div class="evernote"> <a href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank" class="fa fa-bookmark"></a></div><div class="weibo"> <a href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));" class="fa fa-weibo"></a></div><div class="twitter"> <a href="http://twitter.com/home?status=,http://gavincook.me/spring-transaction-jpa/,守望冰雨,你的事务管理器用对了吗,;" class="fa fa-twitter"></a></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a role="navigation" href="/mockbean-not-working/" title="MockBean&quot;罢工了&quot;" class="btn">下一篇</a></li></ul></div><div id="container"></div><script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script><script>var gitment = new Gitment({
-  id: 'spring-transaction-jpa/',
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2020-05-04</span><i class="fa fa-tag"></i><a href="/tags/spring/" title="spring" class="tag">spring </a></div></div></div></div><div class="share"><div class="evernote"> <a href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank" class="fa fa-bookmark"></a></div><div class="weibo"> <a href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));" class="fa fa-weibo"></a></div><div class="twitter"> <a href="http://twitter.com/home?status=,http://gavincook.me/do-you-use-correct-transaction-manager/,守望冰雨,你的事务管理器用对了吗,;" class="fa fa-twitter"></a></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a role="navigation" href="/mockbean-not-working/" title="MockBean&quot;罢工了&quot;" class="btn">下一篇</a></li></ul></div><div id="container"></div><script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script><script>var gitment = new Gitment({
+  id: 'do-you-use-correct-transaction-manager/',
   owner: 'gavincook',
   repo: 'blog-comment',
   oauth: {
