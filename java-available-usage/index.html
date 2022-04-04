@@ -1,34 +1,155 @@
-include mixins
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="gavincook,gavincook200@gmail.com"><title>java available用法 · 守望冰雨</title><meta name="description" content="1. 背景最近在工作中需要实现一个文件下载器，在下载文件的时候，笔者开始使用了如下代码片段：
+byte[] data = new byte[10240];
+try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputS"><meta name="keywords" content="java,available,io,block io"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="stylesheet" href="/css/prism.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/avatar.png" style="width:127px;"><h3 title=""><a href="/">守望冰雨</a></h3><div class="description"><p>千里之行始于足下.</p></div></div></div><ul class="social-links"></ul><div class="tags"><a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/git/" style="font-size: 13.33px;">git</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/io/" style="font-size: 10px;">io</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/jdk%E5%B7%A5%E5%85%B7/" style="font-size: 16.67px;">jdk工具</a> <a href="/tags/jvm/" style="font-size: 16.67px;">jvm</a> <a href="/tags/kafka/" style="font-size: 10px;">kafka</a> <a href="/tags/netty/" style="font-size: 10px;">netty</a> <a href="/tags/others/" style="font-size: 10px;">others</a> <a href="/tags/schedule/" style="font-size: 13.33px;">schedule</a> <a href="/tags/spring/" style="font-size: 16.67px;">spring</a></div><span id="busuanzi_container_site_pv">总访问量：<span id="busuanzi_value_site_pv">0</span><span>次</span></span><div class="footer"><a target="_blank" href="/"><span>Theme by </span></a><a target="_blank" rel="noopener" href="https://www.caicai.me"> CaiCai</a><span>&</span><a target="_blank" rel="noopener" href="https://github.com/Ben02/hexo-theme-Anatole"> Ben</a><div class="by_farbox"><a href="https://hexo.io/zh-cn/" target="_blank">Proudly published with Hexo&#65281;</a></div></div><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ddd68578fd30a6ed4096f17e5c1fdc57";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><!--script.
+  var jiathis_config = {data_track_clickback:'true'};
+  script(src="http://v3.jiathis.com/code/jiathis_r.js?type=left&amp;move=0&amp;uid=2128729")
+  
+script.
+  script(async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js")--></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives/">归档</a></li><li><a href="/about-me/">关于</a></li></div><div class="information"><div class="back_btn"><li><a onclick="window.history.go(-1)" class="fa fa-chevron-left"> </a></li></div><div class="avatar"><img src="http://gavincook.me/avatar.png"></div></div></div><span id="busuanzi_container_page_pv">阅读：<span id="busuanzi_value_page_pv">0</span><span>次</span></span><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>java available用法</a></h3></div><div class="post-content"><h3 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h3><p>最近在工作中需要实现一个文件下载器，在下载文件的时候，笔者开始使用了如下代码片段：</p>
+<pre><code class="java">byte[] data = new byte[10240];
+try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file, true))) {
+    while (in.available() &gt; 0) {
+        int length = in.read(data);
+        out.write(data, 0, length);
+    }
+    out.flush();
+}
+</code></pre>
+<p>逻辑很简单有没有，就是不断检查是否有可读的内容，然后将内容写到输出流中。<br>尴尬的是，一运行，老是重复下载（由于有重试机制）。映射到这里也就是输入流里的数据并没有写入或者并没有完全写入到输出流中。究其原因，是<code>available</code>方法使用不当。</p>
+<p>Java的InputStream类提供<code>available</code>方法，这个方法初看字面意思可能会理解为整个输入流数据的长度，但实际上并不是这样的用法。</p>
+<h3 id="2-定义与用法"><a href="#2-定义与用法" class="headerlink" title="2. 定义与用法"></a>2. 定义与用法</h3><p>先来看下文档说明：</p>
+<pre><code class="java">    /**
+     * Returns an estimate of the number of bytes that can be read (or
+     * skipped over) from this input stream without blocking by the next
+     * invocation of a method for this input stream. The next invocation
+     * might be the same thread or another thread.  A single read or skip of this
+     * many bytes will not block, but may read or skip fewer bytes.
+     *
+     * &lt;p&gt; Note that while some implementations of {@code InputStream} will return
+     * the total number of bytes in the stream, many will not.  It is
+     * never correct to use the return value of this method to allocate
+     * a buffer intended to hold all data in this stream.
+     *
+     * &lt;p&gt; A subclass&#39; implementation of this method may choose to throw an
+     * {@link IOException} if this input stream has been closed by
+     * invoking the {@link #close()} method.
+     *
+     * &lt;p&gt; The {@code available} method for class {@code InputStream} always
+     * returns {@code 0}.
+     *
+     * &lt;p&gt; This method should be overridden by subclasses.
+     *
+     * @return     an estimate of the number of bytes that can be read (or skipped
+     *             over) from this input stream without blocking or {@code 0} when
+     *             it reaches the end of the input stream.
+     * @exception  IOException if an I/O error occurs.
+     */
+    public int available() throws IOException {
+        return 0;
+    }
+</code></pre>
+<p><code>avaliable</code>用于返回非阻塞情况下，一次性可读的字节数。其中提及到不要使用该方法作为申请用于存储整个流数据的缓冲区容量。简而言之，available方法不一定会返回整个流的数据长度，并且绝大部分时候返回的长度都比实际整个流的长度小。</p>
+<p>到这，就明白了为什么用<code>available</code>会导致内容少写或者不写到指定的地方了。对于文件下载的场景而言，数据来源于网络，这SocketInputStream是阻塞的，<code>available</code>的数字每次取决于网络状况。</p>
+<h3 id="3-FileInputStream"><a href="#3-FileInputStream" class="headerlink" title="3. FileInputStream"></a>3. FileInputStream</h3><p>这里有一种较特殊的输入流，与其他阻塞的文件流不同，对于本地文件而言，其输入流的<code>available</code>可以得到整个文件的大小。<code>available</code>是非阻塞的，但文件流又是阻塞的，那么是怎么得到整个文件的大小的呢？<br>FileInputStream#available为一个本地方法，其内容为：</p>
+<pre><code>JNIEXPORT jint JNICALL
+Java_java_io_FileInputStream_available(JNIEnv *env, jobject this) {
+    jlong ret;
+    FD fd = GET_FD(this, fis_fd);
+    if (fd == -1) {
+        JNU_ThrowIOException (env, &quot;Stream Closed&quot;);
+        return 0;
+    }
+    if (IO_Available(fd, &amp;ret)) {
+        if (ret &gt; INT_MAX) {
+            ret = (jlong) INT_MAX;
+        } else if (ret &lt; 0) {
+            ret = 0;
+        }
+        return jlong_to_jint(ret);
+    }
+    JNU_ThrowIOExceptionWithLastError(env, NULL);
+    return 0;
+}
+</code></pre><p>可以看到最终通过<code>IO_Available</code>去获取可读的数据长度。而<code>IO_Available</code>在<code>io_util_md.h</code>中被定义为：<code>#define IO_Available handleAvailable</code>，继续看下<code>handleAvailable</code>的定义：</p>
+<pre><code>int
+handleAvailable(FD fd, jlong *pbytes) {
+    HANDLE h = (HANDLE)fd;
+    DWORD type = 0;
 
-extends partial/layout
+    type = GetFileType(h);
+    /* Handle is for keyboard or pipe */
+    if (type == FILE_TYPE_CHAR || type == FILE_TYPE_PIPE) {
+        int ret;
+        long lpbytes;
+        HANDLE stdInHandle = GetStdHandle(STD_INPUT_HANDLE);
+        if (stdInHandle == h) {
+            ret = handleStdinAvailable(fd, &amp;lpbytes); /* keyboard */
+        } else {
+            ret = handleNonSeekAvailable(fd, &amp;lpbytes); /* pipe */
+        }
+        (*pbytes) = (jlong)(lpbytes);
+        return ret;
+    }
+    /* Handle is for regular file */
+    if (type == FILE_TYPE_DISK) {
+        jlong current, end;
 
-block site_title
-    != page.title + " · " + config.title
+        LARGE_INTEGER filesize;
+        current = handleLseek(fd, 0, SEEK_CUR);
+        if (current &lt; 0) {
+            return FALSE;
+        }
+        if (GetFileSizeEx(h, &amp;filesize) == 0) {
+            return FALSE;
+        }
+        end = long_to_jlong(filesize.QuadPart);
+        *pbytes = end - current;
+        return TRUE;
+    }
+    return FALSE;
+}
+</code></pre><p>其中FILE_TYPE_DISK处就是对本地文件的处理，调用<code>GetFileSizeEx</code>去获取文件本身的大小，而不是从输入流中获得相关的数据大小。对于非本地文件的输入流，依然通过输入流获取可读数据长度，也即不一定得到整个流的数据长度。</p>
+<h3 id="4-修正"><a href="#4-修正" class="headerlink" title="4. 修正"></a>4. 修正</h3><p>如果我们的输入流来源于本地文件，我们可以像文章最开始那样通过<code>available</code>来判断是否还有数据读取，然后再做数据处理操作。但最好不要这样使用，因为对于文件流本身来说，除了本地文件还有网络文件等场景。如果基于本地文件的<code>available</code>的特性来使用<code>FileInputStream</code>，会造成<code>FileInputStream</code>的不可移植性，不适用去非本地文件的其他模式。</p>
+<p>那么对于最开始的场景，我们可以使用如下方式来处理：</p>
+<pre><code class="java">byte[] data = new byte[10240];
+try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file, true))) {
+    int length;
+    while ((length = in.read(data)) != -1) {
+        out.write(data, 0, length);
+    }
+    out.flush();
+} finally {
+    in.close();
+}
+</code></pre>
+<p>每次阻塞读取数据，直到读取到流末尾。这样就能保证将输入流的数据进行完全的处理。</p>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2018-04-09</span><i class="fa fa-tag"></i><a href="/tags/java/" title="java" class="tag">java </a><a href="/tags/io/" title="io" class="tag">io </a></div></div></div></div><div class="share"><div class="evernote"> <a href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank" class="fa fa-bookmark"></a></div><div class="weibo"> <a href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));" class="fa fa-weibo"></a></div><div class="twitter"> <a target="_blank" rel="noopener" href="http://twitter.com/home?status=,http://gavincook.me/java-available-usage/,守望冰雨,java available用法,;" class="fa fa-twitter"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a role="navigation" href="/ByteBuf-vs-ByteBuffer/" title="ByteBuf vs ByteBuffer" class="btn">上一篇</a></li><li class="next pagbuttons"><a role="navigation" href="/jstack/" title="jstack" class="btn">下一篇</a></li></ul></div><div id="container"></div><script src="https://gavincook.me/js/gitment.browser.js"></script><script>var gitment = new Gitment({
+  id: 'java-available-usage/',
+  owner: 'gavincook',
+  repo: 'blog-comment',
+  oauth: {
+    client_id: 'c4abd5f7111d34bf1433',
+    client_secret: 'd5200b8002ac7f63acc69ebb119d9262e9967c3e',
+  },
+});
+gitment.render('container');
 
-block description
-    - var desc = page.desc || strip_html(page.content).replace(/^\s*/, '').replace(/\s*$/, '').substring(0, 150);
-    meta(name="description", content=desc)
 
-
-block content
-  .autopagerize_page_element: .content: .post-page
-    include mixins
-    +make_post(page, true)
-    .share
-      .evernote 
-        a.fa.fa-bookmark(href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title);}})();", ref="nofollow", target="_blank")
-      .weibo 
-        a.fa.fa-weibo(href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&title=',e(d.title),'&appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));")
-      .twitter 
-        a.fa.fa-twitter(href=url_for("http://twitter.com/home?status="+","+config.url+"/"+page.path+","+config.title+","+page.title+",;"))
-    - var prev = page.prev ? page.prev.path : false;
-    - var next = page.next ? page.next.path : false; 
-    .pagination
-      ul.clearfix
-        if prev
-          li.pre.pagbuttons
-            a.btn(role="navigation",href=url_for(prev), title=page.prev.title)!= __('prev_post')
-        if next
-          li.next.pagbuttons
-            a.btn(role="navigation",href=url_for(next), title=page.next.title)!= __('next_post')
-    include partial/comments
+</script></div></div></div></div><script src="/js/jquery.js"></script><script>$(function(){
+  $("pre").addClass("line-numbers");
+  $("pre code").each(function(index, e){
+      var oldCss = $(this).attr("class");
+      if(oldCss){
+        $(this).removeClass(oldCss).addClass("language-" + oldCss);
+      }else{
+        $(this).addClass("language-javascript");
+      }
+  });
+});</script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/prism.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></body></html>

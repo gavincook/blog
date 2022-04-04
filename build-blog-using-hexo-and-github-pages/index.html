@@ -1,34 +1,127 @@
-include mixins
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="gavincook,gavincook200@gmail.com"><title>使用hexo + github pages构建博客 · 守望冰雨</title><meta name="description" content="一般我们要搭建一个博客网站，需要：
 
-extends partial/layout
+租赁一个服务器
+搭建一个博客应用
+编写博客内容
+部署博客应用
+服务器维护
+…
 
-block site_title
-    != page.title + " · " + config.title
+很多时候，我们只想单纯地写个博客。并不想去维护除了博客内容外的其他东西，什么服务器、什么博客应用等等。有没有可能把这些事情找个“人”来做，并且免费呢？
+github-pages
+gi"><meta name="keywords" content="hexo,github pages,static blog,静态博客"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="stylesheet" href="/css/prism.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/avatar.png" style="width:127px;"><h3 title=""><a href="/">守望冰雨</a></h3><div class="description"><p>千里之行始于足下.</p></div></div></div><ul class="social-links"></ul><div class="tags"><a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/git/" style="font-size: 13.33px;">git</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/io/" style="font-size: 10px;">io</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/jdk%E5%B7%A5%E5%85%B7/" style="font-size: 16.67px;">jdk工具</a> <a href="/tags/jvm/" style="font-size: 16.67px;">jvm</a> <a href="/tags/kafka/" style="font-size: 10px;">kafka</a> <a href="/tags/netty/" style="font-size: 10px;">netty</a> <a href="/tags/others/" style="font-size: 10px;">others</a> <a href="/tags/schedule/" style="font-size: 13.33px;">schedule</a> <a href="/tags/spring/" style="font-size: 16.67px;">spring</a></div><span id="busuanzi_container_site_pv">总访问量：<span id="busuanzi_value_site_pv">0</span><span>次</span></span><div class="footer"><a target="_blank" href="/"><span>Theme by </span></a><a target="_blank" rel="noopener" href="https://www.caicai.me"> CaiCai</a><span>&</span><a target="_blank" rel="noopener" href="https://github.com/Ben02/hexo-theme-Anatole"> Ben</a><div class="by_farbox"><a href="https://hexo.io/zh-cn/" target="_blank">Proudly published with Hexo&#65281;</a></div></div><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ddd68578fd30a6ed4096f17e5c1fdc57";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><!--script.
+  var jiathis_config = {data_track_clickback:'true'};
+  script(src="http://v3.jiathis.com/code/jiathis_r.js?type=left&amp;move=0&amp;uid=2128729")
+  
+script.
+  script(async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js")--></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives/">归档</a></li><li><a href="/about-me/">关于</a></li></div><div class="information"><div class="back_btn"><li><a onclick="window.history.go(-1)" class="fa fa-chevron-left"> </a></li></div><div class="avatar"><img src="http://gavincook.me/avatar.png"></div></div></div><span id="busuanzi_container_page_pv">阅读：<span id="busuanzi_value_page_pv">0</span><span>次</span></span><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>使用hexo + github pages构建博客</a></h3></div><div class="post-content"><p>一般我们要搭建一个博客网站，需要：</p>
+<ol>
+<li>租赁一个服务器</li>
+<li>搭建一个博客应用</li>
+<li>编写博客内容</li>
+<li>部署博客应用</li>
+<li>服务器维护</li>
+<li>…</li>
+</ol>
+<p>很多时候，我们只想单纯地写个博客。并不想去维护除了博客内容外的其他东西，什么服务器、什么博客应用等等。有没有可能把这些事情找个“人”来做，并且免费呢？</p>
+<h3 id="github-pages"><a href="#github-pages" class="headerlink" title="github-pages"></a>github-pages</h3><blockquote>
+<p><code>github-pages</code>是<code>github</code>面向用户、组织和项目开放的公共静态页面搭建托管服务。</p>
+</blockquote>
+<p>这不就是我们想要的吗？而且<code>github-pages</code>稳定，无限流量。只需要把博客托管到<code>github-pages</code>上即可，无需关心博客应用、主机等其他事情了。<br><code>github-pages</code>只能托管静态的站点，那么怎么来生成静态站点呢？</p>
+<h3 id="hexo"><a href="#hexo" class="headerlink" title="hexo"></a>hexo</h3><blockquote>
+<p>Hexo 是一个快速、简洁且高效的博客框架。Hexo 使用<br>Markdown（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页。</p>
+</blockquote>
+<p>下面具体看看怎么来利用hexo + github-pages来搭建静态博客（mac环境，其他环境略有不同）：</p>
+<h3 id="安装hexo"><a href="#安装hexo" class="headerlink" title="安装hexo"></a>安装hexo</h3><ol>
+<li>首先安装nodejs: <code>brew install node</code></li>
+<li>安装<a href="https://git-scm.com/" target="_blank" rel="noopener">git</a></li>
+<li>安装hexo: <code>npm install -g hexo-cli</code></li>
+</ol>
+<h3 id="建站"><a href="#建站" class="headerlink" title="建站"></a>建站</h3><ol>
+<li>初始化hexo目录：<code>hexo init &lt;folder&gt;</code></li>
+<li>然后进入第一步中的目录，执行<code>npm install</code></li>
+<li>配置<code>_config.yml</code>, 网站的大部分配置都维护在这个配置文件中。另外主题也会维护一些和主题相关的配置。</li>
+</ol>
+<h3 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h3><ol>
+<li>安装git部署模块<br> 在本地博客目录中执行：<code>npm install hexo-deployer-git --save</code></li>
+<li>创建github-pages<br> 在github上创建一个项目，例如blog（如无账号请，先申请账号）<br><img src="/images/build-blog-using-hexo-and-github-pages-1.png" alt></li>
+<li><p>将初始化的博客传到git上（这里我们上传到master分支上，地址则为第五步项目地址）<br>在<code>_config.xml</code>中配置：</p>
+<pre><code> deploy:
+type: git
+repo: https://github.com/gavincook/blog.git
+branch: master
+</code></pre><p> 然后在博客本地目录执行：<code>hexo g -d</code></p>
+</li>
+<li><p>在github项目设置中打开github-pages，并指定分支<br><img src="/images/build-blog-using-hexo-and-github-pages-2.png" alt><br>这样就完成了静态博客生成，并同步到github上。此时使用github-pages提供的url即可访问。如需配置自定义域名，参见</p>
+</li>
+</ol>
+<h3 id="写作"><a href="#写作" class="headerlink" title="写作"></a>写作</h3><ol>
+<li>执行<code>hexo new &lt;title&gt;</code>创建一个新的文档，如果<code>title</code>如果包含空格，请用引号将<code>title</code>引起来。</li>
+<li>此时会在<code>source/_posts</code>中生成对应的文档（markdown文档）。编辑此markdown文档即可。</li>
+<li>在本地编写博客时，可以通过<code>hexo server</code>启动本地服务，然后通过<code>localhost:4000</code>（默认）进行访问。</li>
+<li>写作完成后，执行一次<code>hexo g -d</code>即可同步</li>
+</ol>
+<h3 id="插件安装"><a href="#插件安装" class="headerlink" title="插件安装"></a>插件安装</h3><ol>
+<li><p>友言评论插件<br>首先在友言上注册账号，然后将代码复制到<code>themes/主题/partial/comments.ejs</code>或其包含在body里的模板。具体视主题的文件结构为准。</p>
+<pre><code> &lt;% if(page.comments &amp;&amp; theme.youyan.on) { %&gt;
+ &lt;!-- UY BEGIN --&gt;
+ &lt;div id=&quot;uyan_frame&quot;&gt;&lt;/div&gt;
+ &lt;script type=&quot;text/javascript&quot; src=&quot;http://v2.uyan.cc/code/uyan.js?uid=申请的id&quot;&gt;&lt;/script&gt;
+ &lt;!-- UY END --&gt;
+ &lt;% } %&gt;
+</code></pre></li>
+<li><p>百度统计插件<br>在<code>themes/主题/partial/footer.ejs</code>或其他通用的模板里引入：</p>
+<pre><code> &lt;script&gt;
+ var _hmt = _hmt || [];
+ (function() {
+   var hm = document.createElement(&quot;script&quot;);
+   hm.src = &quot;https://hm.baidu.com/hm.js?申请的标识&quot;;
+   var s = document.getElementsByTagName(&quot;script&quot;)[0]; 
+   s.parentNode.insertBefore(hm, s);
+ })();
+ &lt;/script&gt;
+</code></pre></li>
+<li><p>jiathis分享插件<br>在和统计插件同样的地方加入：</p>
+<pre><code> &lt;!-- JiaThis Button BEGIN --&gt;
+ &lt;script type=&quot;text/javascript&quot;&gt;
+ var jiathis_config = {data_track_clickback:&#39;true&#39;};
+ &lt;/script&gt;
+ &lt;script type=&quot;text/javascript&quot; src=&quot;http://v3.jiathis.com/code/jiathis_r.js?type=left&amp;amp;move=0&amp;amp;uid=申请的id&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+ &lt;!-- JiaThis Button END --&gt;
+</code></pre></li>
+</ol>
+<h3 id="自定义域名映射"><a href="#自定义域名映射" class="headerlink" title="自定义域名映射"></a>自定义域名映射</h3><ol>
+<li>增加域名解析CNAME，将地址指向<code>github-pages</code>的域名即可。比如<code>gavincook.github.io</code></li>
+<li>然后在本地博客的<code>source/</code>目录中增加一个名为<code>CNAME</code>的文件，内容就为需要配置的域名</li>
+<li>然后将本地博客部署到github即可，这时就能通过自定义域名访问博客了</li>
+</ol>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2017-03-26</span><i class="fa fa-tag"></i><a href="/tags/hexo/" title="hexo" class="tag">hexo </a></div></div></div></div><div class="share"><div class="evernote"> <a href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank" class="fa fa-bookmark"></a></div><div class="weibo"> <a href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));" class="fa fa-weibo"></a></div><div class="twitter"> <a target="_blank" rel="noopener" href="http://twitter.com/home?status=,http://gavincook.me/build-blog-using-hexo-and-github-pages/,守望冰雨,使用hexo + github pages构建博客,;" class="fa fa-twitter"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a role="navigation" href="/setup-kafka/" title="kafka安装" class="btn">上一篇</a></li><li class="next pagbuttons"><a role="navigation" href="/about-me/" title="关于" class="btn">下一篇</a></li></ul></div><div id="container"></div><script src="https://gavincook.me/js/gitment.browser.js"></script><script>var gitment = new Gitment({
+  id: 'build-blog-using-hexo-and-github-pages/',
+  owner: 'gavincook',
+  repo: 'blog-comment',
+  oauth: {
+    client_id: 'c4abd5f7111d34bf1433',
+    client_secret: 'd5200b8002ac7f63acc69ebb119d9262e9967c3e',
+  },
+});
+gitment.render('container');
 
-block description
-    - var desc = page.desc || strip_html(page.content).replace(/^\s*/, '').replace(/\s*$/, '').substring(0, 150);
-    meta(name="description", content=desc)
 
-
-block content
-  .autopagerize_page_element: .content: .post-page
-    include mixins
-    +make_post(page, true)
-    .share
-      .evernote 
-        a.fa.fa-bookmark(href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title);}})();", ref="nofollow", target="_blank")
-      .weibo 
-        a.fa.fa-weibo(href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&title=',e(d.title),'&appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));")
-      .twitter 
-        a.fa.fa-twitter(href=url_for("http://twitter.com/home?status="+","+config.url+"/"+page.path+","+config.title+","+page.title+",;"))
-    - var prev = page.prev ? page.prev.path : false;
-    - var next = page.next ? page.next.path : false; 
-    .pagination
-      ul.clearfix
-        if prev
-          li.pre.pagbuttons
-            a.btn(role="navigation",href=url_for(prev), title=page.prev.title)!= __('prev_post')
-        if next
-          li.next.pagbuttons
-            a.btn(role="navigation",href=url_for(next), title=page.next.title)!= __('next_post')
-    include partial/comments
+</script></div></div></div></div><script src="/js/jquery.js"></script><script>$(function(){
+  $("pre").addClass("line-numbers");
+  $("pre code").each(function(index, e){
+      var oldCss = $(this).attr("class");
+      if(oldCss){
+        $(this).removeClass(oldCss).addClass("language-" + oldCss);
+      }else{
+        $(this).addClass("language-javascript");
+      }
+  });
+});</script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/prism.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></body></html>

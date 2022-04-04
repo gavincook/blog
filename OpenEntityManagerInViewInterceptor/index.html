@@ -1,34 +1,179 @@
-include mixins
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="gavincook,gavincook200@gmail.com"><title>你的事务管理器可能是善变的 · 守望冰雨</title><meta name="description" content="1. 小红的疑惑上回说到，还有一个问题让小红不解。
 
-extends partial/layout
+既然DataSourceTransactionManager在JPA场景下会导致更新操作没法真实在数据库生效，那么之前其他的场景，比如用户注册是怎么将数据落库的呢？难道和定时调度的方式有关系吗？为什么同样的事务管理器在不同场景下，会有不同的效果？"><meta name="keywords" content="spring,OpenEntityManagerInViewInterceptor,jpa,transactionManager"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="stylesheet" href="/css/prism.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/avatar.png" style="width:127px;"><h3 title=""><a href="/">守望冰雨</a></h3><div class="description"><p>千里之行始于足下.</p></div></div></div><ul class="social-links"></ul><div class="tags"><a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/git/" style="font-size: 13.33px;">git</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/io/" style="font-size: 10px;">io</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/jdk%E5%B7%A5%E5%85%B7/" style="font-size: 16.67px;">jdk工具</a> <a href="/tags/jvm/" style="font-size: 16.67px;">jvm</a> <a href="/tags/kafka/" style="font-size: 10px;">kafka</a> <a href="/tags/netty/" style="font-size: 10px;">netty</a> <a href="/tags/others/" style="font-size: 10px;">others</a> <a href="/tags/schedule/" style="font-size: 13.33px;">schedule</a> <a href="/tags/spring/" style="font-size: 16.67px;">spring</a></div><span id="busuanzi_container_site_pv">总访问量：<span id="busuanzi_value_site_pv">0</span><span>次</span></span><div class="footer"><a target="_blank" href="/"><span>Theme by </span></a><a target="_blank" rel="noopener" href="https://www.caicai.me"> CaiCai</a><span>&</span><a target="_blank" rel="noopener" href="https://github.com/Ben02/hexo-theme-Anatole"> Ben</a><div class="by_farbox"><a href="https://hexo.io/zh-cn/" target="_blank">Proudly published with Hexo&#65281;</a></div></div><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ddd68578fd30a6ed4096f17e5c1fdc57";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><!--script.
+  var jiathis_config = {data_track_clickback:'true'};
+  script(src="http://v3.jiathis.com/code/jiathis_r.js?type=left&amp;move=0&amp;uid=2128729")
+  
+script.
+  script(async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js")--></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives/">归档</a></li><li><a href="/about-me/">关于</a></li></div><div class="information"><div class="back_btn"><li><a onclick="window.history.go(-1)" class="fa fa-chevron-left"> </a></li></div><div class="avatar"><img src="http://gavincook.me/avatar.png"></div></div></div><span id="busuanzi_container_page_pv">阅读：<span id="busuanzi_value_page_pv">0</span><span>次</span></span><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>你的事务管理器可能是善变的</a></h3></div><div class="post-content"><h3 id="1-小红的疑惑"><a href="#1-小红的疑惑" class="headerlink" title="1. 小红的疑惑"></a>1. 小红的疑惑</h3><p>上回说到，还有一个问题让小红不解。</p>
+<blockquote>
+<p>既然<code>DataSourceTransactionManager</code>在JPA场景下会导致更新操作没法真实在数据库生效，那么之前其他的场景，比如用户注册是怎么将数据落库的呢？难道和定时调度的方式有关系吗？<br>为什么同样的事务管理器在不同场景下，会有不同的效果？</p>
+</blockquote>
+<h3 id="2-重返现场"><a href="#2-重返现场" class="headerlink" title="2. 重返现场"></a>2. 重返现场</h3><p>为了更好地描述清楚当时的情况，我们来一次情景重现。<br>首先，事务管理器使用的是错误的<code>DataSourceTransactionManager</code>:</p>
+<pre><code class="java">@Bean
+@Primary
+public PlatformTransactionManager transactionManager() {
+    return new DataSourceTransactionManager(dataSource());
+}
+</code></pre>
+<p>接着我们继续看下用户注册场景的代码情况，入口：</p>
+<pre><code class="java">@RestController
+@RequiredArgsConstructor
+public class UserController {
 
-block site_title
-    != page.title + " · " + config.title
+    private final UserService userService;
 
-block description
-    - var desc = page.desc || strip_html(page.content).replace(/^\s*/, '').replace(/\s*$/, '').substring(0, 150);
-    meta(name="description", content=desc)
+    @PostMapping(&quot;/users&quot;)
+    public void createUser(@RequestBody @Valid User user) {
+        userService.createUser(user);
+    }
+}
+</code></pre>
+<p>其中<code>userService#createUser</code>方法直接调用<code>UserRepository#save</code>, <code>UserRepository</code>具体如下：</p>
+<pre><code class="java">@Repository
+public interface UserRepository extends CrudRepository&lt;User, Integer&gt; {
+
+}
+</code></pre>
+<p>也是很简单的流程，对吧。和上回我们看到的定时统计用户注册量逻辑流程很类似，但为什么用户注册可以落库，而定时任务的用户统计却没能落库？</p>
+<h3 id="3-真相只有一个"><a href="#3-真相只有一个" class="headerlink" title="3. 真相只有一个"></a>3. 真相只有一个</h3><p>有了上次的经验，小红知道JPA操作在事务在提交时，才将对应的操作转换为真实数据库操作。这次小红直接从事务提交进行调查。小红这次站在更高的层面去看问题:<code>AbstractPlatformTransactionManager#commit</code>，这是事务提交时的入口。（<em>上回讲到的<code>DataSourceTransactionManager#doCommit</code>为事务提交中的一个环节，且<code>DataSourceTransactionManager#doCommit</code>也直接调用数据库连接进行事务提交，暂时没有什么值得我们深入下去了。</em>）<br><code>AbstractPlatformTransactionManager#commit</code>内部会调用<code>processCommit</code>进行事务真实提交，具体如下：</p>
+<pre><code class="java">private void processCommit(DefaultTransactionStatus status) throws TransactionException {
+    ...
+    if (status.isNewTransaction()) {
+        doCommit(status);
+    }
+    ...
+    try {
+        triggerAfterCommit(status);
+    }
+    finally {
+        triggerAfterCompletion(status, TransactionSynchronization.STATUS_COMMITTED);
+    }
+    ...
+}
+</code></pre>
+<p>其中，<code>doCommit</code>为具体的事务管理器进行实现，这里也即<code>DataSourceTransactionManager#doCommit</code>。既然这一步没有将JPA的操作队列的操作转换为数据库操作，那么继续看<code>triggerAfterCommit</code>会触发什么后置操作。<br>事务提交后回调，最终会遍历当前线程的事务同步<code>TransactionSynchronization</code>，并调用其<code>afterCommit</code>。<br>难道这里会有什么猫腻吗？小红在这里添加了一个断点，来看看究竟有哪些事务同步，最终小红看到有如下两个同步器：</p>
+<ul>
+<li>ExtendedEntityManagerCreator.ExtendedEntityManagerSynchronization</li>
+<li>EntityManagerFactoryUtils.TransactionScopedEntityManagerSynchronization</li>
+</ul>
+<p>先来后到，小红先拿<code>ExtendedEntityManagerCreator.ExtendedEntityManagerSynchronization</code>开刀：</p>
+<pre><code class="java">@Override
+public void afterCommit() {
+    super.afterCommit();
+    try {
+        this.entityManager.getTransaction().commit();
+    }catch (RuntimeException ex) {
+        throw convertException(ex);
+    }
+}
+</code></pre>
+<p>等等，第五行的这段代码不是和上回<code>JpaTransactionManager#doCommit</code>的逻辑一样吗？我们再来回顾下<code>JpaTransactionManager#doCommit</code>:</p>
+<pre><code class="java">protected void doCommit(DefaultTransactionStatus status) {
+    JpaTransactionObject txObject = (JpaTransactionObject) status.getTransaction();
+    ...
+    try {
+        EntityTransaction tx = txObject.getEntityManagerHolder().getEntityManager().getTransaction();
+        tx.commit();
+    }
+    ...
+}
+</code></pre>
+<p>两者都是使用<code>EntityTransaction#commit</code>进行事务的提交，前面我们也聊到，会在<code>EntityTransaction#commit</code>中的真实提交事务之前的刷新操作中，会将JPA操作队列的操作转换为数据库操作，从而完成数据更新操作。</p>
+<p>那这个同步器为什么没有帮助定时调度统计用户注册量的时候，生效对应的数据库操作呢？一番断点操作后，小红发现在定时任务中的数据库事务提交，并没有<code>ExtendedEntityManagerCreator.ExtendedEntityManagerSynchronization</code>，这什么情况？是谁，悄悄放了一个事务同步？</p>
+<p>既然数据库同步器不知道是谁放进来的，那就对事务同步的注册环节进行断点，也即：<code>TransactionSynchronizationManager#registerSynchronization</code>。最终小红揭开了这位神秘侠的面纱：<code>EntityManagerFactoryUtils#doGetTransactionalEntityManager</code>，该工具方法逻辑较多，我们会省去无关当前问题的代码：</p>
+<pre><code class="java">public static EntityManager doGetTransactionalEntityManager(
+        EntityManagerFactory emf, @Nullable Map&lt;?, ?&gt; properties, boolean synchronizedWithTransaction)
+        throws PersistenceException {
+
+    EntityManagerHolder emHolder = (EntityManagerHolder) TransactionSynchronizationManager.getResource(emf);
+    if (emHolder != null) {
+        if (synchronizedWithTransaction) {
+            if (!emHolder.isSynchronizedWithTransaction()) {
+                if (TransactionSynchronizationManager.isActualTransactionActive()) {
+                    try {
+                        emHolder.getEntityManager().joinTransaction();
+                    }
+                    catch (TransactionRequiredException ex) {
+                        logger.debug(&quot;Could not join transaction because none was actually active&quot;, ex);
+                    }
+                }
+                if (TransactionSynchronizationManager.isSynchronizationActive()) {
+                    Object transactionData = prepareTransaction(emHolder.getEntityManager(), emf);
+                    TransactionSynchronizationManager.registerSynchronization(
+                            new TransactionalEntityManagerSynchronization(emHolder, emf, transactionData, false));
+                    emHolder.setSynchronizedWithTransaction(true);
+                }
+            ...
+        }
+       ...
+    }
+    ...
+    return em;
+}
+</code></pre>
+<p>这里着重留意第5行和第11行代码：</p>
+<ol>
+<li>第5行，首先从事务同步的管理器中获取<code>EntityManagerHolder</code></li>
+<li>第11行，如果有对应的资源，且该资源需要被同步但目前还未同步时，就将获取到的资源中的<code>EntityManager</code>加入到当前事务中。</li>
+</ol>
+<p>加入事务的方式，为打开一个事务，并将<code>ExtendedEntityManagerSynchronization</code>注册到事务同步中。以配合我佛大慈大悲，错了，以配合事务提交后回调完成<code>EntityTransaction</code>的提交。具体逻辑如下：</p>
+<pre><code class="java">private void enlistInCurrentTransaction() {
+    EntityTransaction et = this.target.getTransaction();
+    et.begin();
+    ...
+    ExtendedEntityManagerSynchronization extendedEntityManagerSynchronization =
+            new ExtendedEntityManagerSynchronization(this.target, this.exceptionTranslator);
+    TransactionSynchronizationManager.bindResource(this.target, extendedEntityManagerSynchronization);
+    TransactionSynchronizationManager.registerSynchronization(extendedEntityManagerSynchronization);
+}
+</code></pre>
+<p>到这里，我们已经知道了谁来注册的<code>ExtendedEntityManagerSynchronization</code>。所以大功告成了吗？<br>我们是要调查为什么定时任务没有这个事务同步。<br>别急，我们回到<code>EntityManagerFactoryUtils#doGetTransactionalEntityManager</code>，前面说到会从事务同步的管理器中获取<code>EntityManagerHolder</code>这个资源，那么这个资源是谁绑定设置的呢？<br>老规矩，遇事不定上DEBUG。对资源的绑定<code>TransactionSynchronizationManager#bindResource</code>进行断点，最终神秘侠的幕后操作浮出了水面：<code>OpenEntityManagerInViewInterceptor#preHandle</code>:</p>
+<pre><code class="java">@Override
+public void preHandle(WebRequest request) throws DataAccessException {
+    ...
+    if (TransactionSynchronizationManager.hasResource(emf)) {
+        ...
+    }
+    else {
+        ...
+        TransactionSynchronizationManager.bindResource(emf, emHolder);
+        ...
+    }
+}
+</code></pre>
+<p>我们看到这里，如果在当前事务同步管理器中没有找到<code>EntityManagerHolder</code>资源，则会进行绑定。<br>而<code>OpenEntityManagerInViewInterceptor</code>是<code>WebRequestInterceptor</code>的一种具体实现，为一种web请求的拦截器。<br>真相大白了，定时任务场景下并不是web请求，不会经过<code>OpenEntityManagerInViewInterceptor</code>，自然在搭配<code>DataSourceTransactionManager</code>时，也就没有神秘侠来对事务提交助一臂之力了。</p>
+<p>插一句，上面提到的另外一个事务同步：<code>EntityManagerFactoryUtils.TransactionScopedEntityManagerSynchronization</code>中的<code>afterCommit</code>，会直接调用其父类：<code>ResourceHolderSynchronization#afterCommit</code>，而这也是<code>ExtendedEntityManagerCreator.ExtendedEntityManagerSynchronization</code>的父类。所以这个路人甲事务同步器就不再详细查看了。</p>
+<h3 id="4-片尾彩蛋"><a href="#4-片尾彩蛋" class="headerlink" title="4. 片尾彩蛋"></a>4. 片尾彩蛋</h3><p><code>OpenEntityManagerInViewInterceptor</code>虽然帮助我们修正了<code>DataSourceTransactionManager</code> + JPA的组合下，事务提交的问题。但这是<code>OpenEntityManagerInViewInterceptor</code>的本意吗？那如果没有定时任务场景，我们是否还应该继续使用：<code>DataSourceTransactionManager</code> + JPA组合呢？</p>
+<p><code>OpenEntityManagerInViewInterceptor</code>在view层会持续持有可用的<code>EntityManager</code>，其目的是为了在view层可以访问懒加载的数据，而不用在service或者dao层将数据全部强制加载出来。在spring boot中，该拦截器默认是打开的，可以通过<code>spring.jpa.open-in-view</code>进行配置。</p>
+<p>我们看到，<code>OpenEntityManagerInViewInterceptor</code>只是在解决另一方面的问题时，”顺带”也处理了<code>DataSourceTransactionManager</code> + JPA组合下的事务问题。并且该拦截器也只会在web请求场景下生效。在实际场景中，针对JPA，还是应该使用正确的事务管理器：<code>JpaTransactionManager</code>。</p>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2020-05-11</span><i class="fa fa-tag"></i><a href="/tags/spring/" title="spring" class="tag">spring </a></div></div></div></div><div class="share"><div class="evernote"> <a href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank" class="fa fa-bookmark"></a></div><div class="weibo"> <a href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));" class="fa fa-weibo"></a></div><div class="twitter"> <a target="_blank" rel="noopener" href="http://twitter.com/home?status=,http://gavincook.me/OpenEntityManagerInViewInterceptor/,守望冰雨,你的事务管理器可能是善变的,;" class="fa fa-twitter"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a role="navigation" href="/git-cherry-usage/" title="" class="btn">上一篇</a></li><li class="next pagbuttons"><a role="navigation" href="/do-you-use-correct-transaction-manager/" title="你的事务管理器用对了吗" class="btn">下一篇</a></li></ul></div><div id="container"></div><script src="https://gavincook.me/js/gitment.browser.js"></script><script>var gitment = new Gitment({
+  id: 'OpenEntityManagerInViewInterceptor/',
+  owner: 'gavincook',
+  repo: 'blog-comment',
+  oauth: {
+    client_id: 'c4abd5f7111d34bf1433',
+    client_secret: 'd5200b8002ac7f63acc69ebb119d9262e9967c3e',
+  },
+});
+gitment.render('container');
 
 
-block content
-  .autopagerize_page_element: .content: .post-page
-    include mixins
-    +make_post(page, true)
-    .share
-      .evernote 
-        a.fa.fa-bookmark(href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title);}})();", ref="nofollow", target="_blank")
-      .weibo 
-        a.fa.fa-weibo(href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&title=',e(d.title),'&appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));")
-      .twitter 
-        a.fa.fa-twitter(href=url_for("http://twitter.com/home?status="+","+config.url+"/"+page.path+","+config.title+","+page.title+",;"))
-    - var prev = page.prev ? page.prev.path : false;
-    - var next = page.next ? page.next.path : false; 
-    .pagination
-      ul.clearfix
-        if prev
-          li.pre.pagbuttons
-            a.btn(role="navigation",href=url_for(prev), title=page.prev.title)!= __('prev_post')
-        if next
-          li.next.pagbuttons
-            a.btn(role="navigation",href=url_for(next), title=page.next.title)!= __('next_post')
-    include partial/comments
+</script></div></div></div></div><script src="/js/jquery.js"></script><script>$(function(){
+  $("pre").addClass("line-numbers");
+  $("pre code").each(function(index, e){
+      var oldCss = $(this).attr("class");
+      if(oldCss){
+        $(this).removeClass(oldCss).addClass("language-" + oldCss);
+      }else{
+        $(this).addClass("language-javascript");
+      }
+  });
+});</script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/prism.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></body></html>

@@ -1,34 +1,77 @@
-include mixins
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="gavincook,gavincook200@gmail.com"><title>Java中的定时任务（二） -- 工作原理 · 守望冰雨</title><meta name="description" content="0. 不浮于表面的小红上次出色地完成了老板给的重要任务，小红已经升职加薪了。作为资深的搬砖大师，岂能仅仅满足实现出来。这不，小红正在看“晦涩的”源码，准备对定时任务的机制一探究竟。
+1. 假设自己来实现定时任务调度小红心想还好Java对定时任务有内置的支持，要是Java没有提供Timer和Sched"><meta name="keywords" content="java,schedule"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="stylesheet" href="/css/prism.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/avatar.png" style="width:127px;"><h3 title=""><a href="/">守望冰雨</a></h3><div class="description"><p>千里之行始于足下.</p></div></div></div><ul class="social-links"></ul><div class="tags"><a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/git/" style="font-size: 13.33px;">git</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/io/" style="font-size: 10px;">io</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/jdk%E5%B7%A5%E5%85%B7/" style="font-size: 16.67px;">jdk工具</a> <a href="/tags/jvm/" style="font-size: 16.67px;">jvm</a> <a href="/tags/kafka/" style="font-size: 10px;">kafka</a> <a href="/tags/netty/" style="font-size: 10px;">netty</a> <a href="/tags/others/" style="font-size: 10px;">others</a> <a href="/tags/schedule/" style="font-size: 13.33px;">schedule</a> <a href="/tags/spring/" style="font-size: 16.67px;">spring</a></div><span id="busuanzi_container_site_pv">总访问量：<span id="busuanzi_value_site_pv">0</span><span>次</span></span><div class="footer"><a target="_blank" href="/"><span>Theme by </span></a><a target="_blank" rel="noopener" href="https://www.caicai.me"> CaiCai</a><span>&</span><a target="_blank" rel="noopener" href="https://github.com/Ben02/hexo-theme-Anatole"> Ben</a><div class="by_farbox"><a href="https://hexo.io/zh-cn/" target="_blank">Proudly published with Hexo&#65281;</a></div></div><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ddd68578fd30a6ed4096f17e5c1fdc57";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><!--script.
+  var jiathis_config = {data_track_clickback:'true'};
+  script(src="http://v3.jiathis.com/code/jiathis_r.js?type=left&amp;move=0&amp;uid=2128729")
+  
+script.
+  script(async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js")--></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives/">归档</a></li><li><a href="/about-me/">关于</a></li></div><div class="information"><div class="back_btn"><li><a onclick="window.history.go(-1)" class="fa fa-chevron-left"> </a></li></div><div class="avatar"><img src="http://gavincook.me/avatar.png"></div></div></div><span id="busuanzi_container_page_pv">阅读：<span id="busuanzi_value_page_pv">0</span><span>次</span></span><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Java中的定时任务（二） -- 工作原理</a></h3></div><div class="post-content"><h3 id="0-不浮于表面的小红"><a href="#0-不浮于表面的小红" class="headerlink" title="0. 不浮于表面的小红"></a>0. 不浮于表面的小红</h3><p>上次出色地完成了老板给的重要任务，小红已经升职加薪了。作为资深的搬砖大师，岂能仅仅满足实现出来。这不，小红正在看“晦涩的”源码，准备对定时任务的机制一探究竟。</p>
+<h3 id="1-假设自己来实现定时任务调度"><a href="#1-假设自己来实现定时任务调度" class="headerlink" title="1. 假设自己来实现定时任务调度"></a>1. 假设自己来实现定时任务调度</h3><p>小红心想还好Java对定时任务有内置的支持，要是Java没有提供<code>Timer</code>和<code>ScheduledExecutorService</code>，要实现定时任务调度怎么办呢？<br>小红想了下，如果要实现定时任务的调度，至少需要如下特性：</p>
+<ol>
+<li>任务接收<br>这个简单能想到的就是用一个队列来接收任务，然后执行任务的线程从队列中获取。</li>
+<li>任务需尽可能在规定的时间延迟执行<br>一直循环检测是否当前有任务需要立刻执行。那如果没有任务的时候怎么办？会不会引起CPU空转，如果要增加休眠，那休眠时间多长合适？<br>如果使用线程阻塞，那何时唤醒？阻塞是否一直等待，而不用超时？</li>
+<li>总是时间点靠前的任务先执行，哪怕这个任务后于其他任务添加<br>如果有多个任务，是否需要依次检查所有的任务，看是否有需要当前执行的？<br>还是说，将任务按照先后执行顺序进行排序，每次就检测第一个？</li>
+</ol>
+<p>还别说，要实现个定时任务调度，要考虑的地方还真多。接下来我们看看前面用的<code>Timer</code>是怎么解决这些问题的。</p>
+<h3 id="2-Timer"><a href="#2-Timer" class="headerlink" title="2. Timer"></a>2. Timer</h3><h4 id="1-任务接收"><a href="#1-任务接收" class="headerlink" title="1. 任务接收"></a>1. 任务接收</h4><p><code>Timer</code>内部维护了一个<code>TaskQueue</code>用于接收任务。<code>TaskQueue</code>内部是一个数组（默认大小为128），会在任务数据超过128时，进行扩容，每次扩容后为扩容前的两倍。</p>
+<h4 id="2-任务需尽可能在规定的时间延迟执行"><a href="#2-任务需尽可能在规定的时间延迟执行" class="headerlink" title="2. 任务需尽可能在规定的时间延迟执行"></a>2. 任务需尽可能在规定的时间延迟执行</h4><p><code>Timer</code>内部维护了一个<code>TimerThread</code>，该线程会在构造<code>Timer</code>的时候开启。开启后，会一直扫描上述的<code>TaskQueue</code>是否有任务可以执行。<br>那么什么样的任务才是可执行的？<br>调度时间在当前时间或之前（调度时间在当前时间之前的场景，我们在第一篇中已经有涉及，前续任务耗时影响了后续任务），那么就是可执行的。</p>
+<ul>
+<li>假设我们添加了一个当前时间的任务，<code>TimerThread</code>就会扫描到任务，并直接执行。</li>
+<li><p>那如果我们添加了一个明天才执行的任务，<code>TimerThread</code>如何扫描呢？<br>  聪明的<code>TimerThread</code>这时已经知道了这个任务要明天才会执行，所以才不会傻乎乎的一直去看检测任务是否可以执行。而是直接阻塞到这个任务需要执行的时间点。这样就避免了CPU空转，也能及时地在该执行任务的时候及时醒来。<code>Timer</code>使用如下代码实现该阻塞机制。</p>
+<pre><code class="java">  if (!taskFired) // 任务还没有到执行的时机
+      queue.wait(executionTime - currentTime);
+</code></pre>
+</li>
+</ul>
+<h4 id="3-总是时间点靠前的任务先执行，哪怕这个任务后于其他任务添加"><a href="#3-总是时间点靠前的任务先执行，哪怕这个任务后于其他任务添加" class="headerlink" title="3. 总是时间点靠前的任务先执行，哪怕这个任务后于其他任务添加"></a>3. 总是时间点靠前的任务先执行，哪怕这个任务后于其他任务添加</h4><p>到这里，我们终于知道如何在任务该执行的时候执行任务了，并且避免了CPU空转这样的资源浪费。那么这时还有一个问题：<br>我们假设当前时间为10:00 am，任务<code>task1</code>的调度时间为11:00 am，<code>task2</code>的调度时间为10:05 am。并且我们在10点告诉<code>Timer</code>，我们有一个<code>task1</code>需要定时调度；然后我们忙活其他事情去了，接着在10:02am，我们告诉<code>Timer</code>还有一个<code>task2</code>需要定时调度。</p>
+<p>按照我们前面了解到的第一和第二点，流程应该是这样的：</p>
+<ol>
+<li>10:00 am， 添加定时调度<code>task1</code>。</li>
+<li>接着<code>TimerThread</code>会扫描到任务<code>task1</code>，然后发现要11:00 am才执行，所以<code>TimerThread</code>就设置了个11:00 am的闹钟，然后就去玩吃鸡去了。</li>
+<li>10:02 am，我们又添加了一个定时调度任务<code>task2</code>。</li>
+<li>但是这时，<code>TimerThread</code>才刚开始玩吃鸡呢，一直玩到11:00 am，所以<code>task2</code>就得等到<code>TimerThread</code>吃鸡游戏结束后，并把<code>task1</code>执行完了，才能被执行了。至少也要等到11:00 am之后去了。</li>
+</ol>
+<p>这怎么行，正事都不做，就去玩吃鸡去了？于是我们准备去问责<code>TimerThread</code>。<br>正在吃鸡的<code>TimerThread</code>表示，啥，有活干？我不知道啊，我闹钟到11:00 am，那时才有活干。</p>
+<p>为了进一步压榨<code>TimerThread</code>，让<code>TimerThread</code>只要有活的时候就立马干活。<code>Timer</code>增加了一个温馨的“唤醒服务”。只要在有更紧急（时间更靠前）的任务，就去唤醒<code>TimerThread</code>从吃鸡游戏中回到任务调度上来。<br>这里我们不得不先将最开始提到的<code>TaskQueue</code>拉出来再遛遛，除了前面涉及的数据结构和扩容机制。还有一个很重要的特性，那就是按照任务的执行时间先后顺序进行排序。也即越先执行的任务，就会从<code>TaskQueue</code>越先扫描出来。</p>
+<p>那么我们来看下<code>Timer</code>是如何进一步压榨<code>TimerThread</code>的：</p>
+<ol>
+<li>10:00 am， 添加定时调度<code>task1</code>。</li>
+<li>接着<code>TimerThread</code>会扫描到任务<code>task1</code>，然后发现要11:00 am才执行，所以<code>TimerThread</code>就设置了个11:00 am的闹钟，然后就去玩吃鸡去了。</li>
+<li>10:02 am，我们又添加了一个定时调度任务<code>task2</code>。</li>
+<li>那么此时<code>TimerThread</code>中就包含两个任务：[<code>task1</code>, <code>task2</code>]。并会对任务按照执行时间进行排序，排序后 [<code>task2</code>,’task1’]。</li>
+<li><code>Timer</code>会比较新添加的任务是否和排序后的最早需要执行的任务是同一个任务。如果是同一个任务，则表明这个任务更紧急，需要将<code>TimerThread</code>叫过来干活了；如果不是同一个任务，那么就悄悄把任务放到队列就好了，因为<code>TimerThread</code>前面已经知道什么时候应该过来执行最近的一个任务。</li>
+</ol>
+<p>“唤醒服务”其实很简单，使用<code>notify()</code>即可。</p>
+<pre><code class="java">if (queue.getMin() == task)
+   queue.notify();
+</code></pre>
+<h3 id="3-真相只有一个"><a href="#3-真相只有一个" class="headerlink" title="3. 真相只有一个"></a>3. 真相只有一个</h3><p>小红终于轻车熟路地从“晦涩的”源码中，对<code>Timer</code>定时调度机制了解得一清二楚。不就是几个线程阻塞唤醒、一个小排序什么什么的吗？小红此时已经不惧怕是否有定时任务工具类了，甚至还能定制化独特的“小红牌”定时调度呢。不愧为资深搬砖大师，小红端着泡着蒙顶山茶的水杯，来到窗边，世界如此简单😼!</p>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-07-14</span><i class="fa fa-tag"></i><a href="/tags/java/" title="java" class="tag">java </a><a href="/tags/schedule/" title="schedule" class="tag">schedule </a></div></div></div></div><div class="share"><div class="evernote"> <a href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank" class="fa fa-bookmark"></a></div><div class="weibo"> <a href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));" class="fa fa-weibo"></a></div><div class="twitter"> <a target="_blank" rel="noopener" href="http://twitter.com/home?status=,http://gavincook.me/how-schedule-work-in-java/,守望冰雨,Java中的定时任务（二） -- 工作原理,;" class="fa fa-twitter"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a role="navigation" href="/mockbean-not-working/" title="MockBean&quot;罢工了&quot;" class="btn">上一篇</a></li><li class="next pagbuttons"><a role="navigation" href="/schedule-usage-in-java/" title="Java中的定时任务（一） -- 常见用法" class="btn">下一篇</a></li></ul></div><div id="container"></div><script src="https://gavincook.me/js/gitment.browser.js"></script><script>var gitment = new Gitment({
+  id: 'how-schedule-work-in-java/',
+  owner: 'gavincook',
+  repo: 'blog-comment',
+  oauth: {
+    client_id: 'c4abd5f7111d34bf1433',
+    client_secret: 'd5200b8002ac7f63acc69ebb119d9262e9967c3e',
+  },
+});
+gitment.render('container');
 
-extends partial/layout
 
-block site_title
-    != page.title + " · " + config.title
-
-block description
-    - var desc = page.desc || strip_html(page.content).replace(/^\s*/, '').replace(/\s*$/, '').substring(0, 150);
-    meta(name="description", content=desc)
-
-
-block content
-  .autopagerize_page_element: .content: .post-page
-    include mixins
-    +make_post(page, true)
-    .share
-      .evernote 
-        a.fa.fa-bookmark(href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title);}})();", ref="nofollow", target="_blank")
-      .weibo 
-        a.fa.fa-weibo(href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&title=',e(d.title),'&appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));")
-      .twitter 
-        a.fa.fa-twitter(href=url_for("http://twitter.com/home?status="+","+config.url+"/"+page.path+","+config.title+","+page.title+",;"))
-    - var prev = page.prev ? page.prev.path : false;
-    - var next = page.next ? page.next.path : false; 
-    .pagination
-      ul.clearfix
-        if prev
-          li.pre.pagbuttons
-            a.btn(role="navigation",href=url_for(prev), title=page.prev.title)!= __('prev_post')
-        if next
-          li.next.pagbuttons
-            a.btn(role="navigation",href=url_for(next), title=page.next.title)!= __('next_post')
-    include partial/comments
+</script></div></div></div></div><script src="/js/jquery.js"></script><script>$(function(){
+  $("pre").addClass("line-numbers");
+  $("pre code").each(function(index, e){
+      var oldCss = $(this).attr("class");
+      if(oldCss){
+        $(this).removeClass(oldCss).addClass("language-" + oldCss);
+      }else{
+        $(this).addClass("language-javascript");
+      }
+  });
+});</script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/prism.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></body></html>

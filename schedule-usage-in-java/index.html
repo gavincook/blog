@@ -1,34 +1,205 @@
-include mixins
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="gavincook,gavincook200@gmail.com"><title>Java中的定时任务（一） -- 常见用法 · 守望冰雨</title><meta name="description" content="0. 小红被重用了有一天老板对小红说：你的勤勤恳恳的工作，公司都看在眼里的。放心，公司不会亏待像你这样爱工作的好同志的。所以决定交给你一份重要任务，以后每天下班的时候把销售统计报表发一份到我的邮箱里。
+小红：excuse me?…
+一脸诧异，然后开心的接下了任务。
+作为一名老资历的搬砖大师，什么大风"><meta name="keywords" content="java,schedule"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="stylesheet" href="/css/prism.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/avatar.png" style="width:127px;"><h3 title=""><a href="/">守望冰雨</a></h3><div class="description"><p>千里之行始于足下.</p></div></div></div><ul class="social-links"></ul><div class="tags"><a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/git/" style="font-size: 13.33px;">git</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/io/" style="font-size: 10px;">io</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/jdk%E5%B7%A5%E5%85%B7/" style="font-size: 16.67px;">jdk工具</a> <a href="/tags/jvm/" style="font-size: 16.67px;">jvm</a> <a href="/tags/kafka/" style="font-size: 10px;">kafka</a> <a href="/tags/netty/" style="font-size: 10px;">netty</a> <a href="/tags/others/" style="font-size: 10px;">others</a> <a href="/tags/schedule/" style="font-size: 13.33px;">schedule</a> <a href="/tags/spring/" style="font-size: 16.67px;">spring</a></div><span id="busuanzi_container_site_pv">总访问量：<span id="busuanzi_value_site_pv">0</span><span>次</span></span><div class="footer"><a target="_blank" href="/"><span>Theme by </span></a><a target="_blank" rel="noopener" href="https://www.caicai.me"> CaiCai</a><span>&</span><a target="_blank" rel="noopener" href="https://github.com/Ben02/hexo-theme-Anatole"> Ben</a><div class="by_farbox"><a href="https://hexo.io/zh-cn/" target="_blank">Proudly published with Hexo&#65281;</a></div></div><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ddd68578fd30a6ed4096f17e5c1fdc57";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><!--script.
+  var jiathis_config = {data_track_clickback:'true'};
+  script(src="http://v3.jiathis.com/code/jiathis_r.js?type=left&amp;move=0&amp;uid=2128729")
+  
+script.
+  script(async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js")--></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives/">归档</a></li><li><a href="/about-me/">关于</a></li></div><div class="information"><div class="back_btn"><li><a onclick="window.history.go(-1)" class="fa fa-chevron-left"> </a></li></div><div class="avatar"><img src="http://gavincook.me/avatar.png"></div></div></div><span id="busuanzi_container_page_pv">阅读：<span id="busuanzi_value_page_pv">0</span><span>次</span></span><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Java中的定时任务（一） -- 常见用法</a></h3></div><div class="post-content"><h3 id="0-小红被重用了"><a href="#0-小红被重用了" class="headerlink" title="0. 小红被重用了"></a>0. 小红被重用了</h3><p>有一天老板对小红说：你的勤勤恳恳的工作，公司都看在眼里的。放心，公司不会亏待像你这样爱工作的好同志的。所以决定交给你一份重要任务，以后每天下班的时候把销售统计报表发一份到我的邮箱里。</p>
+<p>小红：excuse me?…</p>
+<p>一脸诧异，然后开心的接下了任务。</p>
+<p>作为一名老资历的搬砖大师，什么大风大浪没见过。然后打开了Google，搜索怎么每天自动发报表给老板？懂小红心思的搜索引擎，便在第一条呈现了定时任务。</p>
+<p>接下来让我们看看给小红呈现的自动大法长什么样。</p>
+<h3 id="1-Java对定时任务的支持"><a href="#1-Java对定时任务的支持" class="headerlink" title="1. Java对定时任务的支持"></a>1. Java对定时任务的支持</h3><p>Java提供了多种方式来实现定时任务，常用的有如下两种：</p>
+<ul>
+<li><p>java.util.Timer</p>
+<p>使用Timer进行调度的定时任务，需要为<code>java.util.TimerTask</code>类型。为单线程进行任务调度。</p>
+</li>
+<li><p>java.util.concurrent.ScheduledExecutorService<br>定时任务调度的并发支持，用于有多个任务需要同一时段调用。普通的<code>Runnable</code>和<code>Callable</code>都能用于ScheduledExecutorService定时任务调度。</p>
+</li>
+</ul>
+<p>由于两种方式对于定时任务调度方式如出一辙，后面我们主要以Timer为例说明不同场景的调度实现。</p>
+<h3 id="2-定时任务调度类型"><a href="#2-定时任务调度类型" class="headerlink" title="2. 定时任务调度类型"></a>2. 定时任务调度类型</h3><p>为了后面故事的顺利发展，我们先定义一个可执行的任务用于调度：</p>
+<pre><code class="java"> public class Task extends TimerTask {
+        public Task() {
+            System.out.println(
+                &quot;task initialized at &quot; + LocalDateTime.now().format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm:ss&quot;)));
+        }
 
-extends partial/layout
+        @Override
+        public void run() {
+            System.out.println(
+                &quot;task executed at &quot; + LocalDateTime.now().format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm:ss&quot;)));
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                //ignore
+            }
+        }
+    }
+</code></pre>
+<h4 id="2-1-延后指定间隔执行一次"><a href="#2-1-延后指定间隔执行一次" class="headerlink" title="2.1 延后指定间隔执行一次"></a>2.1 延后指定间隔执行一次</h4><p>比如延后两秒执行：</p>
+<pre><code class="java">Timer timer = new Timer();
+timer.schedule(new Task(), 2000);
+</code></pre>
+<p>启动后运行结果：</p>
+<pre><code class="java">task initialized at 2019-06-08 17:37:12
+task executed at 2019-06-08 17:37:14
+</code></pre>
+<p>可以看到程序启动后，推迟了2s才真正执行任务。</p>
+<h4 id="2-2-指定时间执行一次"><a href="#2-2-指定时间执行一次" class="headerlink" title="2.2 指定时间执行一次"></a>2.2 指定时间执行一次</h4><p>比如在当天的晚上18点执行一次：</p>
+<pre><code class="java">Calendar calendar = Calendar.getInstance();
+calendar.set(Calendar.HOUR_OF_DAY, 18);
+calendar.set(Calendar.MINUTE, 0);
+calendar.set(Calendar.SECOND, 0);
+Timer timer = new Timer();
+timer.schedule(new Task(), calendar.getTime());
+</code></pre>
+<p>如果在18点之前启动，输出：</p>
+<pre><code class="java">task initialized at 2019-06-08 17:58:39
+task executed at 2019-06-08 18:00:00
+</code></pre>
+<p>如果在18点之后启动，输出：</p>
+<pre><code class="java">task initialized at 2019-06-08 18:16:51
+task executed at 2019-06-08 18:16:51
+</code></pre>
+<p>可以看到，如果指定的时间点为未来的某个时间，则会按照预期进行执行。否则，启动就会立即执行任务。</p>
+<h4 id="2-3-延迟指定时间间隔的周期性任务"><a href="#2-3-延迟指定时间间隔的周期性任务" class="headerlink" title="2.3 延迟指定时间间隔的周期性任务"></a>2.3 延迟指定时间间隔的周期性任务</h4><p>Timer允许指定首次执行的延迟，以及后续每次执行的周期间隔。<br>比如初始化后延迟5秒执行任务，以后每隔2秒执行一次。</p>
+<pre><code class="java">Timer timer = new Timer();
+timer.schedule(new Task(), 5000, 2000);
+</code></pre>
+<p>输出：</p>
+<pre><code class="java">task initialized at 2019-06-08 18:58:13
+task executed at 2019-06-08 18:58:18
+task executed at 2019-06-08 18:58:20
+task executed at 2019-06-08 18:58:22
+...
+</code></pre>
+<p>可以看到第一次执行在初始化后的第5s才执行，后面每隔2s就会执行一次。虽然任务本身需要1s的执行时间。</p>
+<p>如果我们将TimerTask的休眠时间调整为比间隔更大的时间，比如3s。定时任务还会如期的每隔2s执行一次吗？<br>如下为调整休眠时间为3s的输出:</p>
+<pre><code class="java">task initialized at 2019-06-08 18:59:51
+task executed at 2019-06-08 18:59:56
+task executed at 2019-06-08 18:59:59
+task executed at 2019-06-08 19:00:02
+task executed at 2019-06-08 19:00:05
+...
+</code></pre>
+<p>可以看到，后续的定时任务，虽然指定每隔2s执行一次，但实际每3s执行了一次。不过一想，这也合理啊。Timer为单线程调度定时任务，它会竭尽所能地让任务在指定时间执行。但当有任务比较耗时，一直忙着呢，对于并没有三头六臂的Timer，肯定需要忙完手上的活，才有时间调度后续的任务。</p>
+<h4 id="2-4-指定第一次执行的时间，后续每隔一定间隔执行"><a href="#2-4-指定第一次执行的时间，后续每隔一定间隔执行" class="headerlink" title="2.4 指定第一次执行的时间，后续每隔一定间隔执行"></a>2.4 指定第一次执行的时间，后续每隔一定间隔执行</h4><p>这和2.3类似，只不过指定第一次执行的时间为绝对时间，而不是延迟一个相对时间。<br>比如从当天19:01开始，每隔2s执行一次。</p>
+<pre><code class="java">Timer timer = new Timer();
+Calendar calendar = Calendar.getInstance();
+calendar.set(Calendar.HOUR_OF_DAY, 19);
+calendar.set(Calendar.MINUTE, 1);
+calendar.set(Calendar.SECOND, 0);
 
-block site_title
-    != page.title + " · " + config.title
+timer.scheduleAtFixedRate(new Task(), calendar.getTime(), 2000);
+</code></pre>
+<p>输出：</p>
+<pre><code class="java">task initialized at 2019-06-08 19:00:44
+task executed at 2019-06-08 19:01:00
+task executed at 2019-06-08 19:01:02
+task executed at 2019-06-08 19:01:04
+...
+</code></pre>
+<p>如果在19:01之后执行，则输出如下：</p>
+<pre><code class="java">task initialized at 2019-06-08 19:23:28
+task executed at 2019-06-08 19:23:28
+task executed at 2019-06-08 19:23:30
+task executed at 2019-06-08 19:23:32
+...
+</code></pre>
+<p>我们看到，当指定的绝对时间在当前时间之前，初始化完成后会立即执行。<br>并且，Timer会从当前的时间开始推算下一次需要执行的时间，在这里，第二次执行时间为<code>2019-06-08 19:23:30</code>。</p>
+<h4 id="2-5-固定频率，延迟指定时间间隔的周期性任务"><a href="#2-5-固定频率，延迟指定时间间隔的周期性任务" class="headerlink" title="2.5 固定频率，延迟指定时间间隔的周期性任务"></a>2.5 固定频率，延迟指定时间间隔的周期性任务</h4><p>Timer允许指定首次执行的延迟，以及后续每次执行的周期间隔。<br>比如初始化后延迟5秒执行任务，以后每隔2秒执行一次。</p>
+<pre><code class="java">Timer timer = new Timer();
+timer.scheduleAtFixedRate(new Task(), 5000, 2000);
+</code></pre>
+<p>输出：</p>
+<pre><code class="java">task initialized at 2019-06-08 18:32:41
+task executed at 2019-06-08 18:32:46
+task executed at 2019-06-08 18:32:48
+task executed at 2019-06-08 18:32:50
+...
+</code></pre>
+<p>可以看到第一次执行在初始化后的第5s才执行，后面每隔2s就会执行一次。虽然任务本身需要1s的执行时间。</p>
+<p>如果我们将TimerTask的休眠时间调整为比间隔更大的时间，比如3s。定时任务还会如期的每隔2s执行一次吗？<br>如下为调整休眠时间为3s的输出:</p>
+<pre><code class="java">task initialized at 2019-06-08 18:34:50
+task executed at 2019-06-08 18:34:55
+task executed at 2019-06-08 18:34:58
+task executed at 2019-06-08 18:35:01
+task executed at 2019-06-08 18:35:04
+...
+</code></pre>
+<p>可以看到，后续的定时任务，虽然指定每隔2s执行一次，但实际每3s执行了一次。和2.3中一致。</p>
+<h4 id="2-6-固定频率，指定第一次执行的时间，后续每隔一定间隔执行"><a href="#2-6-固定频率，指定第一次执行的时间，后续每隔一定间隔执行" class="headerlink" title="2.6 固定频率，指定第一次执行的时间，后续每隔一定间隔执行"></a>2.6 固定频率，指定第一次执行的时间，后续每隔一定间隔执行</h4><p>这和2.5类似，只不过指定第一次执行的时间为绝对时间，而不是延迟一个相对时间。<br>比如从当天18点45开始，每隔2s执行一次。</p>
+<pre><code class="java">Timer timer = new Timer();
+Calendar calendar = Calendar.getInstance();
+calendar.set(Calendar.HOUR_OF_DAY, 18);
+calendar.set(Calendar.MINUTE, 45);
+calendar.set(Calendar.SECOND, 0);
 
-block description
-    - var desc = page.desc || strip_html(page.content).replace(/^\s*/, '').replace(/\s*$/, '').substring(0, 150);
-    meta(name="description", content=desc)
+timer.scheduleAtFixedRate(new Task(), calendar.getTime(), 2000);
+</code></pre>
+<p>输出：</p>
+<pre><code class="java">task initialized at 2019-06-08 18:44:49
+task executed at 2019-06-08 18:45:00
+task executed at 2019-06-08 18:45:02
+task executed at 2019-06-08 18:45:04
+...
+</code></pre>
+<p>如果在18点45之后执行，则输出如下：</p>
+<pre><code class="java">task initialized at 2019-06-08 18:48:39
+task executed at 2019-06-08 18:48:39
+task executed at 2019-06-08 18:48:40
+task executed at 2019-06-08 18:48:41
+task executed at 2019-06-08 18:48:42
+...
+</code></pre>
+<p>我们看到，当指定的绝对时间在当前时间之前，初始化完成后会立即执行。<br>并且，Timer会从<strong>指定的时间</strong>开始推算下一次需要执行的时间，在这里，第二次执行时间为<code>2019-06-08 18:45:02</code>。而这个时间已经比当前时间小了，所以会立即执行。</p>
+<p>所以，虽然我们指定每隔2s执行一次，但由于Timer会在补偿执行由于指定时间早于第一次开始执行的时间之间的任务。所以会一直连续不断的执行任务（每次任务耗时1s），直到下次执行时间为未来某个时间为止。</p>
+<h4 id="2-7-小结"><a href="#2-7-小结" class="headerlink" title="2.7 小结"></a>2.7 小结</h4><p>固定频率和其他调度方式，主要差别在于如何计算下次执行时间</p>
+<ul>
+<li>固定频率： 用上次任务执行时间计算下次执行时间</li>
+<li>其他周期性调度： 用当前时间计算下次执行时间</li>
+</ul>
+<h3 id="3-小红的自动大法"><a href="#3-小红的自动大法" class="headerlink" title="3. 小红的自动大法"></a>3. 小红的自动大法</h3><p>Java为小红提供了行行种种的调度方式，小红决定写个定时任务，这样就不用每天自己亲自操作了。</p>
+<p>小红需要每天下班的时候（18:00）准时发送销售统计邮件给老板，综合上述调度方式，固定频率方式更适合。伪代码如下：</p>
+<pre><code class="java">Timer timer = new Timer();
+Calendar calendar = Calendar.getInstance();
+calendar.set(Calendar.HOUR_OF_DAY, 18);
+calendar.set(Calendar.MINUTE, 0);
+calendar.set(Calendar.SECOND, 0);
+
+timer.scheduleAtFixedRate(()-&gt;sendEmailToBoss(), calendar.getTime(), 24*3600*1000);//delay one day
+</code></pre>
+<p>小红当天就开启了这个服务，从这天开始，就会每天18:00整准时给老板报告销售统计情况。小红脸上浮出满意的微笑，离走上人生巅峰，又近了一大截。</p>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-06-07</span><i class="fa fa-tag"></i><a href="/tags/java/" title="java" class="tag">java </a><a href="/tags/schedule/" title="schedule" class="tag">schedule </a></div></div></div></div><div class="share"><div class="evernote"> <a href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank" class="fa fa-bookmark"></a></div><div class="weibo"> <a href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));" class="fa fa-weibo"></a></div><div class="twitter"> <a target="_blank" rel="noopener" href="http://twitter.com/home?status=,http://gavincook.me/schedule-usage-in-java/,守望冰雨,Java中的定时任务（一） -- 常见用法,;" class="fa fa-twitter"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a role="navigation" href="/how-schedule-work-in-java/" title="Java中的定时任务（二） -- 工作原理" class="btn">上一篇</a></li><li class="next pagbuttons"><a role="navigation" href="/identifier-case-sensitivity-in-mysql/" title="MySQL中标识符大小写区分及lower_case_table_names参数" class="btn">下一篇</a></li></ul></div><div id="container"></div><script src="https://gavincook.me/js/gitment.browser.js"></script><script>var gitment = new Gitment({
+  id: 'schedule-usage-in-java/',
+  owner: 'gavincook',
+  repo: 'blog-comment',
+  oauth: {
+    client_id: 'c4abd5f7111d34bf1433',
+    client_secret: 'd5200b8002ac7f63acc69ebb119d9262e9967c3e',
+  },
+});
+gitment.render('container');
 
 
-block content
-  .autopagerize_page_element: .content: .post-page
-    include mixins
-    +make_post(page, true)
-    .share
-      .evernote 
-        a.fa.fa-bookmark(href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title);}})();", ref="nofollow", target="_blank")
-      .weibo 
-        a.fa.fa-weibo(href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&title=',e(d.title),'&appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));")
-      .twitter 
-        a.fa.fa-twitter(href=url_for("http://twitter.com/home?status="+","+config.url+"/"+page.path+","+config.title+","+page.title+",;"))
-    - var prev = page.prev ? page.prev.path : false;
-    - var next = page.next ? page.next.path : false; 
-    .pagination
-      ul.clearfix
-        if prev
-          li.pre.pagbuttons
-            a.btn(role="navigation",href=url_for(prev), title=page.prev.title)!= __('prev_post')
-        if next
-          li.next.pagbuttons
-            a.btn(role="navigation",href=url_for(next), title=page.next.title)!= __('next_post')
-    include partial/comments
+</script></div></div></div></div><script src="/js/jquery.js"></script><script>$(function(){
+  $("pre").addClass("line-numbers");
+  $("pre code").each(function(index, e){
+      var oldCss = $(this).attr("class");
+      if(oldCss){
+        $(this).removeClass(oldCss).addClass("language-" + oldCss);
+      }else{
+        $(this).addClass("language-javascript");
+      }
+  });
+});</script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/prism.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></body></html>

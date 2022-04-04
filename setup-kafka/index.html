@@ -1,34 +1,303 @@
-include mixins
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="gavincook,gavincook200@gmail.com"><title>kafka安装 · 守望冰雨</title><meta name="description" content="1. 安装包准备
+【必选】下载kafka,(戳我下载)
+【可选】如果使用独立的zookeeper，则还需下载zookeeper（戳我下载）
 
-extends partial/layout
+2. 部署2.1. 启动zookeeper
+使用外部zookeeper, 将下载的zookeeper安装包解压，执行：
+  bin/zkServer.sh s"><meta name="keywords" content="setup kafka,kafka 安装,kafka 搭建"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="stylesheet" href="/css/prism.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/avatar.png" style="width:127px;"><h3 title=""><a href="/">守望冰雨</a></h3><div class="description"><p>千里之行始于足下.</p></div></div></div><ul class="social-links"></ul><div class="tags"><a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/git/" style="font-size: 13.33px;">git</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/io/" style="font-size: 10px;">io</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/jdk%E5%B7%A5%E5%85%B7/" style="font-size: 16.67px;">jdk工具</a> <a href="/tags/jvm/" style="font-size: 16.67px;">jvm</a> <a href="/tags/kafka/" style="font-size: 10px;">kafka</a> <a href="/tags/netty/" style="font-size: 10px;">netty</a> <a href="/tags/others/" style="font-size: 10px;">others</a> <a href="/tags/schedule/" style="font-size: 13.33px;">schedule</a> <a href="/tags/spring/" style="font-size: 16.67px;">spring</a></div><span id="busuanzi_container_site_pv">总访问量：<span id="busuanzi_value_site_pv">0</span><span>次</span></span><div class="footer"><a target="_blank" href="/"><span>Theme by </span></a><a target="_blank" rel="noopener" href="https://www.caicai.me"> CaiCai</a><span>&</span><a target="_blank" rel="noopener" href="https://github.com/Ben02/hexo-theme-Anatole"> Ben</a><div class="by_farbox"><a href="https://hexo.io/zh-cn/" target="_blank">Proudly published with Hexo&#65281;</a></div></div><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ddd68578fd30a6ed4096f17e5c1fdc57";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><!--script.
+  var jiathis_config = {data_track_clickback:'true'};
+  script(src="http://v3.jiathis.com/code/jiathis_r.js?type=left&amp;move=0&amp;uid=2128729")
+  
+script.
+  script(async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js")--></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives/">归档</a></li><li><a href="/about-me/">关于</a></li></div><div class="information"><div class="back_btn"><li><a onclick="window.history.go(-1)" class="fa fa-chevron-left"> </a></li></div><div class="avatar"><img src="http://gavincook.me/avatar.png"></div></div></div><span id="busuanzi_container_page_pv">阅读：<span id="busuanzi_value_page_pv">0</span><span>次</span></span><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>kafka安装</a></h3></div><div class="post-content"><h3 id="1-安装包准备"><a href="#1-安装包准备" class="headerlink" title="1. 安装包准备"></a>1. 安装包准备</h3><ol>
+<li>【必选】下载kafka,(<a href="http://kafka.apache.org/downloads" target="_blank" rel="noopener">戳我下载</a>)</li>
+<li>【可选】如果使用独立的zookeeper，则还需下载zookeeper（<a href="https://zookeeper.apache.org/releases.html#download" target="_blank" rel="noopener">戳我下载</a>）</li>
+</ol>
+<h3 id="2-部署"><a href="#2-部署" class="headerlink" title="2. 部署"></a>2. 部署</h3><h4 id="2-1-启动zookeeper"><a href="#2-1-启动zookeeper" class="headerlink" title="2.1. 启动zookeeper"></a>2.1. 启动zookeeper</h4><ul>
+<li><p>使用外部zookeeper, 将下载的zookeeper安装包解压，执行：</p>
+<pre><code class="bash">  bin/zkServer.sh start
+</code></pre>
+<p>则以2181端口启动一个单节点zookeeper实例</p>
+</li>
+<li><p>使用kafka安装包里自带的zookeeper</p>
+<pre><code class="bash">  bin/zookeeper-server-start.sh config/zookeeper.properties
+</code></pre>
+<p>默认以2181端口启动一个单节点zookeeper实例</p>
+</li>
+</ul>
+<h4 id="2-2-启动kafka"><a href="#2-2-启动kafka" class="headerlink" title="2.2. 启动kafka"></a>2.2. 启动kafka</h4><p>在kafka目录执行：</p>
+<pre><code class="bash">bin/kafka-server-start.sh config/server.properties
+</code></pre>
+<p>默认kafka不以守护线程启动，若要以守护线程启动kafka，执行：</p>
+<pre><code class="bash">bin/kafka-server-start.sh -daemon config/server.properties
+</code></pre>
+<p>这样我们就启动了一个kafka实例，监听端口为9092，zookeeper地址为：localhost:2181。若想修改端口，或者zookeeper的地址，调整<code>config/server.properties</code>中的如下配置即可：</p>
+<pre><code class="bash">listeners=PLAINTEXT://:9092
+zookeeper.connect=localhost:2181
+</code></pre>
+<h3 id="3-测试"><a href="#3-测试" class="headerlink" title="3. 测试"></a>3. 测试</h3><h4 id="3-1-创建主题"><a href="#3-1-创建主题" class="headerlink" title="3.1. 创建主题"></a>3.1. 创建主题</h4><p>默认配置下，该步骤非必须。在生产者发送消息到kafka时，如果主题不存在，会默认进行创建。通过如下配置进行控制：</p>
+<pre><code>auto.create.topics.enable=true
+</code></pre><p>这里我们创建一个名称为test，分区数为1，复制因子为1的主题：</p>
+<pre><code>bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test
+</code></pre><h4 id="3-2-生产者"><a href="#3-2-生产者" class="headerlink" title="3.2. 生产者"></a>3.2. 生产者</h4><pre><code>bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test
+</code></pre><p>其中<code>localhost:9092</code>为kafka服务实例的ip和端口，<code>test</code>为主题。<br>执行上述命令后，可以任意输入一些字符，以作为消息发送到kafka。</p>
+<h4 id="3-3-消费者"><a href="#3-3-消费者" class="headerlink" title="3.3. 消费者"></a>3.3. 消费者</h4><pre><code>bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic test --from-beginning
+</code></pre><p>其中<code>localhost:2181</code>为zookeeper地址， <code>test</code>为需要消费的主题，<code>--from-beginning</code>表示从头开始消费该主题的消息。如果没有该标识，则只消费在消费者启动之后发动到kafka的消息。<br>如果执行上述命令后，能看到在3.2中发送的消息，则说明kafka服务实例工作正常。</p>
+<h3 id="4-集群搭建"><a href="#4-集群搭建" class="headerlink" title="4. 集群搭建"></a>4. 集群搭建</h3><p>kafka的单节点和集群搭建很类似，只需要保证不同的kafka节点使用同一个zookeeper地址，并且broker.id不一样即可。</p>
+<p>这样，将多个kafka都启动了之后，则会组成一个kafka集群。另外注意：如果是在同一台主机启动多个kafka集群节点，还需要注意日志目录不能重复：<code>log.dirs=/tmp/kafka-logs</code>。并且kafka的监听端口也需要唯一，通过<code>listeners=PLAINTEXT://:9092</code>修改。<br>例如（在同一主机部署）：</p>
+<ul>
+<li>kafka-first实例配置：<pre><code>broker.id=1
+log.dirs=/tmp/kafka-logs-first
+listeners=PLAINTEXT://:9092
+zookeeper.connect=localhost:2181
+//其他配置
+</code></pre></li>
+<li>kafka-second实例配置：<pre><code>broker.id=2
+log.dirs=/tmp/kafka-logs-second
+listeners=PLAINTEXT://:9093
+zookeeper.connect=localhost:2181
+//其他配置
+</code></pre></li>
+</ul>
+<h3 id="5-集群测试"><a href="#5-集群测试" class="headerlink" title="5. 集群测试"></a>5. 集群测试</h3><p>可直接使用上述第3节的测试内容进行测试。另外可对不同的kafka服务启动不同的生产者（生产者耦合kafka服务地址），然后只启动一个消费者（耦合zookeeper地址）。然后检测是否多个生产者的消息都能被该消费者消费。</p>
+<h3 id="6-附录（kafka配置参考-kafka配置）"><a href="#6-附录（kafka配置参考-kafka配置）" class="headerlink" title="6. 附录（kafka配置参考:kafka配置）"></a>6. 附录（kafka配置参考:<a href="http://debugo.com/kafka-params/" target="_blank" rel="noopener">kafka配置</a>）</h3><pre><code>#唯一标识在集群中的ID，要求是正数。
+broker.id=0
+#监听地址，不设为所有地址
+host.name=debugo01
 
-block site_title
-    != page.title + " · " + config.title
+# 处理网络请求的最大线程数
+num.network.threads=2
+# 处理磁盘I/O的线程数
+num.io.threads=8
+# 一些后台线程数
+background.threads = 4
+# 等待IO线程处理的请求队列最大数
+queued.max.requests = 500
 
-block description
-    - var desc = page.desc || strip_html(page.content).replace(/^\s*/, '').replace(/\s*$/, '').substring(0, 150);
-    meta(name="description", content=desc)
+#  socket的发送缓冲区（SO_SNDBUF）
+socket.send.buffer.bytes=1048576
+# socket的接收缓冲区 (SO_RCVBUF) 
+socket.receive.buffer.bytes=1048576
+# socket请求的最大字节数。为了防止内存溢出，message.max.bytes必然要小于
+socket.request.max.bytes = 104857600
+
+############################# Topic #############################
+# 每个topic的分区个数，更多的partition会产生更多的segment file
+num.partitions=2
+# 是否允许自动创建topic ，若是false，就需要通过命令创建topic
+auto.create.topics.enable =true
+# 一个topic ，默认分区的replication个数 ，不能大于集群中broker的个数。
+default.replication.factor =1
+# 消息体的最大大小，单位是字节
+message.max.bytes = 1000000
+
+############################# ZooKeeper #############################
+# Zookeeper quorum设置。如果有多个使用逗号分割
+zookeeper.connect=debugo01:2181,debugo02,debugo03
+# 连接zk的超时时间
+zookeeper.connection.timeout.ms=1000000
+# ZooKeeper集群中leader和follower之间的同步实际
+zookeeper.sync.time.ms = 2000
+
+############################# Log #############################
+#日志存放目录，多个目录使用逗号分割
+log.dirs=/var/log/kafka
+
+# 当达到下面的消息数量时，会将数据flush到日志文件中。默认10000
+#log.flush.interval.messages=10000
+# 当达到下面的时间(ms)时，执行一次强制的flush操作。interval.ms和interval.messages无论哪个达到，都会flush。默认3000ms
+#log.flush.interval.ms=1000
+# 检查是否需要将日志flush的时间间隔
+log.flush.scheduler.interval.ms = 3000
+
+# 日志清理策略（delete|compact）
+log.cleanup.policy = delete
+# 日志保存时间 (hours|minutes)，默认为7天（168小时）。超过这个时间会根据policy处理数据。bytes和minutes无论哪个先达到都会触发。
+log.retention.hours=168
+# 日志数据存储的最大字节数。超过这个时间会根据policy处理数据。
+#log.retention.bytes=1073741824
+
+# 控制日志segment文件的大小，超出该大小则追加到一个新的日志segment文件中（-1表示没有限制）
+log.segment.bytes=536870912
+# 当达到下面时间，会强制新建一个segment
+log.roll.hours = 24*7
+# 日志片段文件的检查周期，查看它们是否达到了删除策略的设置（log.retention.hours或log.retention.bytes）
+log.retention.check.interval.ms=60000
+
+# 是否开启压缩
+log.cleaner.enable=false
+# 对于压缩的日志保留的最长时间
+log.cleaner.delete.retention.ms = 1 day
+
+# 对于segment日志的索引文件大小限制
+log.index.size.max.bytes = 10 * 1024 * 1024
+#y索引计算的一个缓冲区，一般不需要设置。
+log.index.interval.bytes = 4096
+
+############################# replica #############################
+# partition management controller 与replicas之间通讯的超时时间
+controller.socket.timeout.ms = 30000
+# controller-to-broker-channels消息队列的尺寸大小
+controller.message.queue.size=10
+# replicas响应leader的最长等待时间，若是超过这个时间，就将replicas排除在管理之外
+replica.lag.time.max.ms = 10000
+# 是否允许控制器关闭broker ,若是设置为true,会关闭所有在这个broker上的leader，并转移到其他broker
+controlled.shutdown.enable = false
+# 控制器关闭的尝试次数
+controlled.shutdown.max.retries = 3
+# 每次关闭尝试的时间间隔
+controlled.shutdown.retry.backoff.ms = 5000
+
+# 如果relicas落后太多,将会认为此partition relicas已经失效。而一般情况下,因为网络延迟等原因,总会导致replicas中消息同步滞后。如果消息严重滞后,leader将认为此relicas网络延迟较大或者消息吞吐能力有限。在broker数量较少,或者网络不足的环境中,建议提高此值.
+replica.lag.max.messages = 4000
+#leader与relicas的socket超时时间
+replica.socket.timeout.ms= 30 * 1000
+# leader复制的socket缓存大小
+replica.socket.receive.buffer.bytes=64 * 1024
+# replicas每次获取数据的最大字节数
+replica.fetch.max.bytes = 1024 * 1024
+# replicas同leader之间通信的最大等待时间，失败了会重试
+replica.fetch.wait.max.ms = 500
+# 每一个fetch操作的最小数据尺寸,如果leader中尚未同步的数据不足此值,将会等待直到数据达到这个大小
+replica.fetch.min.bytes =1
+# leader中进行复制的线程数，增大这个数值会增加relipca的IO
+num.replica.fetchers = 1
+# 每个replica将最高水位进行flush的时间间隔
+replica.high.watermark.checkpoint.interval.ms = 5000
+
+# 是否自动平衡broker之间的分配策略
+auto.leader.rebalance.enable = false
+# leader的不平衡比例，若是超过这个数值，会对分区进行重新的平衡
+leader.imbalance.per.broker.percentage = 10
+# 检查leader是否不平衡的时间间隔
+leader.imbalance.check.interval.seconds = 300
+# 客户端保留offset信息的最大空间大小
+offset.metadata.max.bytes = 1024
+
+#############################Consumer #############################
+# Consumer端核心的配置是group.id、zookeeper.connect
+# 决定该Consumer归属的唯一组ID，By setting the same group id multiple processes indicate that they are all part of the same consumer group.
+group.id
+# 消费者的ID，若是没有设置的话，会自增
+consumer.id
+# 一个用于跟踪调查的ID ，最好同group.id相同
+client.id = &lt;group_id&gt;
+
+# 对于zookeeper集群的指定，必须和broker使用同样的zk配置
+zookeeper.connect=debugo01:2182,debugo02:2182,debugo03:2182
+# zookeeper的心跳超时时间，查过这个时间就认为是无效的消费者
+zookeeper.session.timeout.ms = 6000
+# zookeeper的等待连接时间
+zookeeper.connection.timeout.ms = 6000
+# zookeeper的follower同leader的同步时间
+zookeeper.sync.time.ms = 2000
+# 当zookeeper中没有初始的offset时，或者超出offset上限时的处理方式 。
+# smallest ：重置为最小值 
+# largest:重置为最大值 
+# anything else：抛出异常给consumer
+auto.offset.reset = largest
+
+# socket的超时时间，实际的超时时间为max.fetch.wait + socket.timeout.ms.
+socket.timeout.ms= 30 * 1000
+# socket的接收缓存空间大小
+socket.receive.buffer.bytes=64 * 1024
+#从每个分区fetch的消息大小限制
+fetch.message.max.bytes = 1024 * 1024
+
+# true时，Consumer会在消费消息后将offset同步到zookeeper，这样当Consumer失败后，新的consumer就能从zookeeper获取最新的offset
+auto.commit.enable = true
+# 自动提交的时间间隔
+auto.commit.interval.ms = 60 * 1000
+
+# 用于消费的最大数量的消息块缓冲大小，每个块可以等同于fetch.message.max.bytes中数值
+queued.max.message.chunks = 10
+
+# 当有新的consumer加入到group时,将尝试reblance,将partitions的消费端迁移到新的consumer中, 该设置是尝试的次数
+rebalance.max.retries = 4
+# 每次reblance的时间间隔
+rebalance.backoff.ms = 2000
+# 每次重新选举leader的时间
+refresh.leader.backoff.ms
+
+# server发送到消费端的最小数据，若是不满足这个数值则会等待直到满足指定大小。默认为1表示立即接收。
+fetch.min.bytes = 1
+# 若是不满足fetch.min.bytes时，等待消费端请求的最长等待时间
+fetch.wait.max.ms = 100
+# 如果指定时间内没有新消息可用于消费，就抛出异常，默认-1表示不受限
+consumer.timeout.ms = -1
+
+#############################Producer#############################
+# 核心的配置包括：
+# metadata.broker.list
+# request.required.acks
+# producer.type
+# serializer.class
+
+# 消费者获取消息元信息(topics, partitions and replicas)的地址,配置格式是：host1:port1,host2:port2，也可以在外面设置一个vip
+metadata.broker.list
+
+#消息的确认模式
+# 0：不保证消息的到达确认，只管发送，低延迟但是会出现消息的丢失，在某个server失败的情况下，有点像TCP
+# 1：发送消息，并会等待leader 收到确认后，一定的可靠性
+# -1：发送消息，等待leader收到确认，并进行复制操作后，才返回，最高的可靠性
+request.required.acks = 0
+
+# 消息发送的最长等待时间
+request.timeout.ms = 10000
+# socket的缓存大小
+send.buffer.bytes=100*1024
+# key的序列化方式，若是没有设置，同serializer.class
+key.serializer.class
+# 分区的策略，默认是取模
+partitioner.class=kafka.producer.DefaultPartitioner
+# 消息的压缩模式，默认是none，可以有gzip和snappy
+compression.codec = none
+# 可以针对默写特定的topic进行压缩
+compressed.topics=null
+# 消息发送失败后的重试次数
+message.send.max.retries = 3
+# 每次失败后的间隔时间
+retry.backoff.ms = 100
+# 生产者定时更新topic元信息的时间间隔 ，若是设置为0，那么会在每个消息发送后都去更新数据
+topic.metadata.refresh.interval.ms = 600 * 1000
+# 用户随意指定，但是不能重复，主要用于跟踪记录消息
+client.id=&quot;&quot;
+
+# 异步模式下缓冲数据的最大时间。例如设置为100则会集合100ms内的消息后发送，这样会提高吞吐量，但是会增加消息发送的延时
+queue.buffering.max.ms = 5000
+# 异步模式下缓冲的最大消息数，同上
+queue.buffering.max.messages = 10000
+# 异步模式下，消息进入队列的等待时间。若是设置为0，则消息不等待，如果进入不了队列，则直接被抛弃
+queue.enqueue.timeout.ms = -1
+# 异步模式下，每次发送的消息数，当queue.buffering.max.messages或queue.buffering.max.ms满足条件之一时producer会触发发送。
+batch.num.messages=200
+</code></pre></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2017-03-26</span><i class="fa fa-tag"></i><a href="/tags/kafka/" title="kafka" class="tag">kafka </a></div></div></div></div><div class="share"><div class="evernote"> <a href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank" class="fa fa-bookmark"></a></div><div class="weibo"> <a href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));" class="fa fa-weibo"></a></div><div class="twitter"> <a target="_blank" rel="noopener" href="http://twitter.com/home?status=,http://gavincook.me/setup-kafka/,守望冰雨,kafka安装,;" class="fa fa-twitter"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a role="navigation" href="/rename-file-or-directory-in-java/" title="重命名文件(目录)" class="btn">上一篇</a></li><li class="next pagbuttons"><a role="navigation" href="/build-blog-using-hexo-and-github-pages/" title="使用hexo + github pages构建博客" class="btn">下一篇</a></li></ul></div><div id="container"></div><script src="https://gavincook.me/js/gitment.browser.js"></script><script>var gitment = new Gitment({
+  id: 'setup-kafka/',
+  owner: 'gavincook',
+  repo: 'blog-comment',
+  oauth: {
+    client_id: 'c4abd5f7111d34bf1433',
+    client_secret: 'd5200b8002ac7f63acc69ebb119d9262e9967c3e',
+  },
+});
+gitment.render('container');
 
 
-block content
-  .autopagerize_page_element: .content: .post-page
-    include mixins
-    +make_post(page, true)
-    .share
-      .evernote 
-        a.fa.fa-bookmark(href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title);}})();", ref="nofollow", target="_blank")
-      .weibo 
-        a.fa.fa-weibo(href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&title=',e(d.title),'&appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));")
-      .twitter 
-        a.fa.fa-twitter(href=url_for("http://twitter.com/home?status="+","+config.url+"/"+page.path+","+config.title+","+page.title+",;"))
-    - var prev = page.prev ? page.prev.path : false;
-    - var next = page.next ? page.next.path : false; 
-    .pagination
-      ul.clearfix
-        if prev
-          li.pre.pagbuttons
-            a.btn(role="navigation",href=url_for(prev), title=page.prev.title)!= __('prev_post')
-        if next
-          li.next.pagbuttons
-            a.btn(role="navigation",href=url_for(next), title=page.next.title)!= __('next_post')
-    include partial/comments
+</script></div></div></div></div><script src="/js/jquery.js"></script><script>$(function(){
+  $("pre").addClass("line-numbers");
+  $("pre code").each(function(index, e){
+      var oldCss = $(this).attr("class");
+      if(oldCss){
+        $(this).removeClass(oldCss).addClass("language-" + oldCss);
+      }else{
+        $(this).addClass("language-javascript");
+      }
+  });
+});</script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/prism.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></body></html>
