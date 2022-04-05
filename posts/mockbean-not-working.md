@@ -213,7 +213,7 @@ public int hashCode() {
 
 那么，也就是说针对上面的两个测试，因为他们的`@MockBean`使用的字段类型不一致，应该使用两个不同的spring上下文才对。事实也确实是这样的：
 
-![4](/images/mockbean-not-working-4.png)
+![4](../assets/mockbean-not-working-4.png)
 
 这就尴尬了，明明是两个不同的spring上下文，怎么运行时，两个测试用的是同一个上下文？
 
