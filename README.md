@@ -4,6 +4,6 @@
 
 博客中的观点仅代表个人理解，由于个人能力有限，难免有理解不当的地方。欢迎大家拍砖。
 
-邮箱：gavincook200@gmail.com
+邮箱：gavincook200@gmail.cowm
 
 我在github: [@gavincook](https://github.com/gavincook)
