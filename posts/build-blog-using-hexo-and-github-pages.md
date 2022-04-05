@@ -36,7 +36,7 @@
     在本地博客目录中执行：`npm install hexo-deployer-git --save`
 2. 创建github-pages
     在github上创建一个项目，例如blog（如无账号请，先申请账号）
-![](/images/build-blog-using-hexo-and-github-pages-1.png)
+![](../assets/build-blog-using-hexo-and-github-pages-1.png)
 3. 将初始化的博客传到git上（这里我们上传到master分支上，地址则为第五步项目地址）
    在`_config.xml`中配置：
     ```
@@ -48,7 +48,7 @@
     然后在博客本地目录执行：`hexo g -d`
 
 4. 在github项目设置中打开github-pages，并指定分支
-![](/images/build-blog-using-hexo-and-github-pages-2.png)
+![](../assets/build-blog-using-hexo-and-github-pages-2.png)
 这样就完成了静态博客生成，并同步到github上。此时使用github-pages提供的url即可访问。如需配置自定义域名，参见
 
 ### 写作

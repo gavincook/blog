@@ -140,17 +140,17 @@ mock没有生效，莫非是mock的对象和使用的对象是不同的实例，
 
 为了验证这点，小红在`ScoreController`也注入了`StudentInfoService`。然后调试发现，在运行`ScoreControllerTest`测试时，使用的对象为：
 
-![1](/images/mockbean-not-working-1.png)
+![1](../assets/mockbean-not-working-1.png)
 
 这也是符合预期的，因为这时并没有对`StudentInfoService`进行mock，当然就只有`ScoreService`被mock了。
 
 在`StudentControllerTest`运行时，在测试方法处studentInfoService对象为：
 
-![2](/images/mockbean-not-working-2.png)
+![2](../assets/mockbean-not-working-2.png)
 
 而在执行到被测试的`StudentController`时，情况如下：
 
-![3](/images/mockbean-not-working-3.png)
+![3](../assets/mockbean-not-working-3.png)
 
 明眼人一下就看出来了，在`StudentControllerTest`执行时，测试里mock了`StudentInfoService`，但spring上下文里没有mock。再一细看，居然和`ScoreControllerTest`执行时，spring上下文中的`StudentInfoService`是一个实例。
 
