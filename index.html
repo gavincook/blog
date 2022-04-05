@@ -1,41 +1,25 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="gavincook,gavincook200@gmail.com"><title>守望冰雨</title><meta name="description" content="A Blog Powered By Hexo"><meta name="keywords" content="Linux,Java,Python"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="stylesheet" href="/css/prism.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/avatar.png" style="width:127px;"><h3 title=""><a href="/">守望冰雨</a></h3><div class="description"><p>千里之行始于足下.</p></div></div></div><ul class="social-links"></ul><div class="tags"><a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/git/" style="font-size: 13.33px;">git</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/io/" style="font-size: 10px;">io</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/jdk%E5%B7%A5%E5%85%B7/" style="font-size: 16.67px;">jdk工具</a> <a href="/tags/jvm/" style="font-size: 16.67px;">jvm</a> <a href="/tags/kafka/" style="font-size: 10px;">kafka</a> <a href="/tags/netty/" style="font-size: 10px;">netty</a> <a href="/tags/others/" style="font-size: 10px;">others</a> <a href="/tags/schedule/" style="font-size: 13.33px;">schedule</a> <a href="/tags/spring/" style="font-size: 16.67px;">spring</a></div><span id="busuanzi_container_site_pv">总访问量：<span id="busuanzi_value_site_pv">0</span><span>次</span></span><div class="footer"><a target="_blank" href="/"><span>Theme by </span></a><a target="_blank" rel="noopener" href="https://www.caicai.me"> CaiCai</a><span>&</span><a target="_blank" rel="noopener" href="https://github.com/Ben02/hexo-theme-Anatole"> Ben</a><div class="by_farbox"><a href="https://hexo.io/zh-cn/" target="_blank">Proudly published with Hexo&#65281;</a></div></div><script>var _hmt = _hmt || [];
-(function() {
-  var hm = document.createElement("script");
-  hm.src = "https://hm.baidu.com/hm.js?ddd68578fd30a6ed4096f17e5c1fdc57";
-  var s = document.getElementsByTagName("script")[0]; 
-  s.parentNode.insertBefore(hm, s);
-})();
-</script><!--script.
-  var jiathis_config = {data_track_clickback:'true'};
-  script(src="http://v3.jiathis.com/code/jiathis_r.js?type=left&amp;move=0&amp;uid=2128729")
-  
-script.
-  script(async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js")--></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/" class="current">首页</a></li><li><a href="/archives/">归档</a></li><li><a href="/about-me/">关于</a></li></div><div class="information"><div class="back_btn"><li><a onclick="window.history.go(-1)" style="display:none;" class="fa fa-chevron-left"> </a></li></div><div class="avatar"><img src="http://gavincook.me/avatar.png"></div></div></div><span id="busuanzi_container_page_pv">阅读：<span id="busuanzi_value_page_pv">0</span><span>次</span></span><div class="autopagerize_page_element"><div class="content"><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/graphical-git-workspace/">变更的一生</a></h3></div><div class="post-content"><p>对于刚接触git的小伙伴来说，会觉得相对于svn等版本控制软件差异很大。代码撸好了，却要“倒腾”半天，进行一连串操作才能将代码提交上去。之所以有这样的困惑，那是因为我们还不了解git的工作流程。我们来看看变更的一生是怎样的？
-
-工作区：项目文件夹下直接能看到的目录和文件，可以直接撸代码的区域。
-暂存区：变更暂时存...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2020-06-10</span><i class="fa fa-tag"></i><a href="/tags/git/" title="git" class="tag">git </a></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/graphical-git-introduction/">git由来</a></h3></div><div class="post-content"><p>说git之前，不得不先说说BitKeeper。2002年开始，Linus决定使用BitKeeper作为Linux内核代码的版本控制系统。虽然社区对选择BitKeeper有各种质疑的声音，但Linus决定的，还能怎么样，本本分分地使用呗。在解决了Linux内核代码的版本控制问题后，终于不用Linus这位大神，每次都...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2020-06-07</span><i class="fa fa-tag"></i><a href="/tags/git/" title="git" class="tag">git </a></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/git-cherry-usage/"></a></h3></div><div class="post-content"><p>小红最近参与的项目，发布频次比较高。经常是边有功能开发，边发布。为了保证发布特定的功能特性，且不会被正在进行的开发影响，每次准备上线时就会从master分支切出一个新的发布分支，比如release/1.0.0。这样就可以对发布分支进行发布前的验证，如果有BUG，也可以直接在发布分支上进行修复即可。与此同时，还能继...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2020-06-02</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/OpenEntityManagerInViewInterceptor/">你的事务管理器可能是善变的</a></h3></div><div class="post-content"><p>1. 小红的疑惑上回说到，还有一个问题让小红不解。
-
-既然DataSourceTransactionManager在JPA场景下会导致更新操作没法真实在数据库生效，那么之前其他的场景，比如用户注册是怎么将数据落库的呢？难道和定时调度的方式有关系吗？为什么同样的事务管理器在不同场景下，会有不同的效果？
-
-2. 重返...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2020-05-11</span><i class="fa fa-tag"></i><a href="/tags/spring/" title="spring" class="tag">spring </a></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/do-you-use-correct-transaction-manager/">你的事务管理器用对了吗</a></h3></div><div class="post-content"><p>1. 小红的定时任务秀逗了今天搬砖大师小红又犯愁了，明明定时任务都按时调度了，但数据库里的数据却原封不动，好像定时任务从未执行过一样。这就好比明明干完活了，临了领工资的时候，包工头却说你没干活。
-2. 案发现场最近，老板想要知道每天系统增加了多少用户，以查看推广活动是否有带来用户量。这么关键的指标最终落到了小红身...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2020-05-04</span><i class="fa fa-tag"></i><a href="/tags/spring/" title="spring" class="tag">spring </a></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/mockbean-not-working/">MockBean&quot;罢工了&quot;</a></h3></div><div class="post-content"><p>0. 小红的测试挂了作为资深搬砖大师，小红的出手的各种代码，都会有对应的测试进行验证。但今天小红却犯了愁。原来小红有两个测试，单独跑测试的时候都是草原绿，但一起跑的时候挂掉了。
-1. 案发现场小红在负责的学生管理系统里，有这么两个需求：
-
-根据名字搜索对应的学生
-点击搜索出来的学生信息，能查阅对应的成绩
-
-小红针...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-07-28</span><i class="fa fa-tag"></i><a href="/tags/java/" title="java" class="tag">java </a><a href="/tags/spring/" title="spring" class="tag">spring </a></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/how-schedule-work-in-java/">Java中的定时任务（二） -- 工作原理</a></h3></div><div class="post-content"><p>0. 不浮于表面的小红上次出色地完成了老板给的重要任务，小红已经升职加薪了。作为资深的搬砖大师，岂能仅仅满足实现出来。这不，小红正在看“晦涩的”源码，准备对定时任务的机制一探究竟。
-1. 假设自己来实现定时任务调度小红心想还好Java对定时任务有内置的支持，要是Java没有提供Timer和ScheduledExe...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-07-14</span><i class="fa fa-tag"></i><a href="/tags/java/" title="java" class="tag">java </a><a href="/tags/schedule/" title="schedule" class="tag">schedule </a></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/schedule-usage-in-java/">Java中的定时任务（一） -- 常见用法</a></h3></div><div class="post-content"><p>0. 小红被重用了有一天老板对小红说：你的勤勤恳恳的工作，公司都看在眼里的。放心，公司不会亏待像你这样爱工作的好同志的。所以决定交给你一份重要任务，以后每天下班的时候把销售统计报表发一份到我的邮箱里。
-小红：excuse me?…
-一脸诧异，然后开心的接下了任务。
-作为一名老资历的搬砖大师，什么大风大浪没见过。然...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-06-07</span><i class="fa fa-tag"></i><a href="/tags/java/" title="java" class="tag">java </a><a href="/tags/schedule/" title="schedule" class="tag">schedule </a></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/identifier-case-sensitivity-in-mysql/">MySQL中标识符大小写区分及lower_case_table_names参数</a></h3></div><div class="post-content"><p>0. 背景最近几天在倒腾分布式事务相关的东西，其中在测试验证阿里的分布式事务方案GTS时，有一个简要的示例。根据脚本创建了相应的数据库后，运行发现有异常。查看日志提示获取表的元数据异常。这里我们假设我们要操作的表为table_a。数据库中的表名为table_a，日志中提示的是TABLE_A。咋一看也没什么不对，M...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2018-06-21</span><i class="fa fa-tag"></i><a href="/tags/MySQL/" title="MySQL" class="tag">MySQL </a></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/spring-applicationcontextaware/">Spring ApplicationContextAware与循环依赖</a></h3></div><div class="post-content"><p>在一个风和日丽的下午，笔者正在开开心心地撸着代码。一切都那么水到渠成，好了，写完，坐等启动…嗯？？？启动异常，乍一看NPE，再一看，Spring依赖的bean属性没有注入？为了描述具体的场景，这里将问题用示例代码抽取出来。我们有两个Spring Bean，CandidateOne和CandidateTwo，具体代...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2018-06-13</span><i class="fa fa-tag"></i><a href="/tags/spring/" title="spring" class="tag">spring </a></div></div></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a role="navigation" href="/page/2/" class="btn">下一页</a></li></ul></div></div></div></div><script src="/js/jquery.js"></script><script>$(function(){
-  $("pre").addClass("line-numbers");
-  $("pre code").each(function(index, e){
-      var oldCss = $(this).attr("class");
-      if(oldCss){
-        $(this).removeClass(oldCss).addClass("language-" + oldCss);
-      }else{
-        $(this).addClass("language-javascript");
-      }
-  });
-});</script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/prism.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="description" content="Description">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    window.$docsify = {
+      name: '',
+      repo: '',
+      loadSidebar: true,
+      subMaxLevel: 3,
+      formatUpdated: '{YYYY}-{MM}-{DD}'
+    }
+  </script>
+  <!-- Docsify v4 -->
+  <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+</body>
+</html>
