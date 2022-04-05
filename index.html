@@ -7,6 +7,7 @@
   <link rel="icon" href="/avatar.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+  <link rel="stylesheet" href="//unpkg.com/gitalk/dist/gitalk.css">
 </head>
 <body>
   <div id="app"></div>
@@ -18,10 +19,28 @@
       loadNavbar: true,
       subMaxLevel: 3,
       formatUpdated: '{YYYY}-{MM}-{DD}',
-      coverpage: true
+      coverpage: true,
+      onlyCover: true,
+      topMargin: 90, // default: 0
+      routerMode: 'history'
     }
   </script>
   <!-- Docsify v4 -->
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.js"></script>
+  <script type="text/javascript">
+    const gitalk = new Gitalk({
+      clientID: 'c4abd5f7111d34bf1433',
+      clientSecret: 'd5200b8002ac7f63acc69ebb119d9262e9967c3e',
+      repo: 'blog-comment',      // The repository of store comments,
+      owner: 'gavincook',
+      admin: ['GitHub repo owner and collaborators, only these guys can initialize github issues'],
+      id: location.pathname,      // Ensure uniqueness and length less than 50
+      distractionFreeMode: false  // Facebook-like distraction free mode
+    });
+
+    gitalk.render('gitalk-container')
+  </script>
 </body>
 </html>
