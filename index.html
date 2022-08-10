@@ -22,13 +22,17 @@
       coverpage: true,
       onlyCover: true,
       topMargin: 90, // default: 0
-      routerMode: 'hash'
+      routerMode: 'hash',
+      loadFooter: true,
+      loadFooter: '_footer.md'
     }
   </script>
   <!-- Docsify v4 -->
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
   <script src="//cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@alertbox/docsify-footer/dist/docsify-footer.min.js"></script>
+
   <script type="text/javascript">
     var gitalk;
     window.addEventListener('hashchange', function() {
@@ -63,12 +67,5 @@ var _hmt = _hmt || [];
   s.parentNode.insertBefore(hm, s);
 })();
 </script>
-
-  <div style="position: absolute;
-    bottom: 0;
-    text-align: center;
-    width: 100%;">
-    <a style="text-decoration: none;color: #171717;" href="https://beian.miit.gov.cn/" target="_blank">蜀ICP备18021948号-1</a>
-  </div>
 </body>
 </html>
